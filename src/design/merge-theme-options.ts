@@ -1,5 +1,5 @@
-import type { ThemeOptions } from '@mui/material';
-import { deepmerge } from '@mui/utils';
+import type { ThemeOptions } from '@mui/material/styles';
+import deepmerge from '@mui/utils/deepmerge';
 
 type StyleOverrideFn = (props: unknown) => Record<string, unknown>;
 type StyleOverrideValue = Record<string, unknown> | StyleOverrideFn;

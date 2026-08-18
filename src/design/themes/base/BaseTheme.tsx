@@ -7,7 +7,7 @@ import {
   type ThemeOptions,
 } from '@mui/material/styles';
 import { DatePickerToolbarClassKey } from '@mui/x-date-pickers/DatePicker';
-import { MultiSectionDigitalClockClassKey } from '@mui/x-date-pickers';
+import { MultiSectionDigitalClockClassKey } from '@mui/x-date-pickers/MultiSectionDigitalClock';
 import { inputBaseClasses } from '@mui/material/InputBase';
 import { outlinedInputClasses } from '@mui/material/OutlinedInput';
 

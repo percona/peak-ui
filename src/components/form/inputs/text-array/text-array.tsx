@@ -14,12 +14,14 @@
 
 import { useEffect, useState } from 'react';
 import { FieldError, useFieldArray, useFormContext } from 'react-hook-form';
-import { IconButton, InputAdornment } from '@mui/material';
-import { DeleteOutlineOutlined as DeleteOutlineOutlinedIcon } from '@mui/icons-material';
 
 import { TextArrayProps } from './text-array.types';
 import TextInput from '../text';
 import ActionableLabeledContent from '../../../actionable-labeled-content';
+
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 const TextArray = ({
   fieldName,

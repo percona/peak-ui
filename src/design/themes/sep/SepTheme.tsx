@@ -1,10 +1,11 @@
-import { PaletteMode, ThemeOptions } from '@mui/material';
 import { mergeThemeOptions } from '../../merge-theme-options';
 import { iconButtonClasses } from '@mui/material/IconButton';
 import { listItemIconClasses } from '@mui/material/ListItemIcon';
 import { listItemButtonClasses } from '@mui/material/ListItemButton';
 
 import baseThemeOptions, { semanticTokensLight, semanticTokensDark, shape } from '../base';
+
+import { PaletteMode, ThemeOptions } from '@mui/material/styles';
 
 // SEP brand colors
 const sepBrand = {

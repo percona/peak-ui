@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { ButtonProps, MenuProps } from '@mui/material';
+import { ButtonProps } from '@mui/material/Button';
+import { MenuProps } from '@mui/material/Menu';
 
 export type MenuButtonProps = {
   children?: (handleClose: () => void) => ReactNode;

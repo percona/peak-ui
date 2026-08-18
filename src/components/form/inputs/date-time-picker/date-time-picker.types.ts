@@ -1,5 +1,6 @@
 import { Control, FieldPath, FieldValues, UseControllerProps } from 'react-hook-form';
-import { DateTimePickerProps, PickerValidDate } from '@mui/x-date-pickers';
+import { DateTimePickerProps } from '@mui/x-date-pickers/DateTimePicker';
+import { PickerValidDate } from '@mui/x-date-pickers/models';
 
 export type DateTimePickerValueFormat = 'date' | 'iso-string' | 'unix-ms';
 

@@ -1,15 +1,14 @@
-import {
-  CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@mui/material';
 import { kebabize } from '@/utils';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { SelectInputProps } from './select.types';
 import { Messages } from './select.messages';
+
+import CircularProgress from '@mui/material/CircularProgress';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 
 const SelectInput = <T extends FieldValues = FieldValues>({
   name,

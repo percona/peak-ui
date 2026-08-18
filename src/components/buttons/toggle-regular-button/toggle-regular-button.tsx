@@ -1,5 +1,7 @@
-import { ToggleButton, useTheme } from '@mui/material';
 import { ToggleRegularButtonProps } from './toggle-regular-button.types';
+
+import ToggleButton from '@mui/material/ToggleButton';
+import { useTheme } from '@mui/material/styles';
 
 const ToggleRegularButton = ({ children, sx, dataTestId, ...props }: ToggleRegularButtonProps) => {
   const theme = useTheme();

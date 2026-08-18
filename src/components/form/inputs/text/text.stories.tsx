@@ -5,8 +5,11 @@ import * as DocBlock from '@storybook/addon-docs/blocks';
 import TextInput from './text';
 import { TextInputProps } from './text.types';
 import { useState } from 'react';
-import { IconButton, InputAdornment } from '@mui/material';
-import { SearchOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchOutlined from '@mui/icons-material/SearchOutlined';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 type ExpandedTextInputProps = TextInputProps & {
   readOnly?: boolean;

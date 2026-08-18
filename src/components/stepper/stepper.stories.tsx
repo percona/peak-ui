@@ -1,9 +1,16 @@
 import { Meta, StoryObj } from '@storybook/react';
 import Stepper from './stepper';
 import { StepperProps } from './stepper.types';
-import { Box, Button, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
 import React from 'react';
 import * as DocBlock from '@storybook/addon-docs/blocks';
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Step from '@mui/material/Step';
+import StepButton from '@mui/material/StepButton';
+import StepContent from '@mui/material/StepContent';
+import StepLabel from '@mui/material/StepLabel';
+import Typography from '@mui/material/Typography';
 
 const steps = ['Step 1', 'Step 2', 'Step 3', 'Step 4'];
 

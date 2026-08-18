@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { render } from '@testing-library/react';
-import { Box, Button, Step, StepLabel, Typography } from '@mui/material';
 import Stepper from '.';
 import { baseThemeOptions, ThemeContextProvider } from '../../design';
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Typography from '@mui/material/Typography';
 
 const StepperWithoutConnectors = () => {
   const steps = [

@@ -1,5 +1,7 @@
-import { Box, LinearProgress } from '@mui/material';
 import { ProgressBarProps } from './progress-bar.types';
+
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const ProgressBar = ({ dataTestId, value, buffer, total, label }: ProgressBarProps) => {
   const value1Percentage = (value / total) * 100;

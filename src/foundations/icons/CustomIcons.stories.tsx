@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { ContentCopy, Search } from '@mui/icons-material';
 import { type SvgIconProps } from '@mui/material/SvgIcon';
 import {
   BottomPanelCloseIcon,
@@ -36,6 +35,9 @@ import {
   QueryStatsIcon,
   SearchInsightsIcon,
 } from '../../components/icons';
+
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import Search from '@mui/icons-material/Search';
 
 interface CustomIconEntry {
   component: ComponentType<SvgIconProps>;

@@ -1,4 +1,4 @@
-import type { SxProps, Theme } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
 import { flattenSx, mergeSx } from './sx';
 

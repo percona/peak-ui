@@ -1,7 +1,7 @@
-import { TextField } from '@mui/material';
 import { kebabize } from '@/utils';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { TextInputProps } from './text.types';
+import TextField from '@mui/material/TextField';
 
 const TextInput = <T extends FieldValues = FieldValues>({
   control,

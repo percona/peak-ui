@@ -1,8 +1,8 @@
-import { ToggleButtonGroup } from '@mui/material';
 import { kebabize } from '@/utils';
 import LabeledContent from '../../../labeled-content';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { ToggleButtonGroupInputProps } from './toggle-button-group.types';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const ToggleButtonGroupInput = <T extends FieldValues = FieldValues>({
   name,

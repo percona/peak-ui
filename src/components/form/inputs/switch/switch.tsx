@@ -1,7 +1,10 @@
-import { FormControlLabel, Switch, Typography } from '@mui/material';
 import { kebabize } from '@/utils';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { SwitchInputProps } from './switch.types';
+
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Typography from '@mui/material/Typography';
 
 const SwitchInput = <T extends FieldValues = FieldValues>({
   name,

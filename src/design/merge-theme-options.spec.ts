@@ -1,4 +1,4 @@
-import type { ThemeOptions } from '@mui/material';
+import type { ThemeOptions } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
 import baseThemeOptions from './themes/base/BaseTheme';
 import { mergeThemeOptions } from './merge-theme-options';

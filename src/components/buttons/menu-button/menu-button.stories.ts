@@ -1,5 +1,5 @@
-import { Button } from '@mui/material';
 import type { Meta, StoryObj } from '@storybook/react';
+import Button from '@mui/material/Button';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
