@@ -14,16 +14,24 @@ PEAK UI (`@percona/peak-ui`) is a React + MUI v7 component library published as 
 - **Lint:** `pnpm lint` (ESLint over `src`)
 - **Format:** `pnpm format` (Prettier write) · **check only:** `pnpm format:check`
 - **Test:** `pnpm test` (Vitest, run once) · **watch:** `pnpm test:watch`
+- **Verify (full gate):** `pnpm verify` (typecheck + lint + format:check + test)
 
 ## Verification (MANDATORY after any code change)
 
 Before considering the work done, run the safety gate and make it pass:
 
 ```
-pnpm typecheck && pnpm lint && pnpm format:check && pnpm test
+pnpm verify
 ```
 
-If `format:check` fails, fix it with `pnpm format` (don't hand-edit whitespace). If `typecheck`, `lint`, or `test` fail, fix the underlying issue and re-run the full chain until green. Do not report a change as complete until this passes.
+If `format:check` fails, fix it with `pnpm format` (don't hand-edit whitespace). If `typecheck`, `lint`, or `test` fail, fix the underlying issue and re-run `pnpm verify` until green. Do not report a change as complete until this passes.
+
+The gate includes executable design-system constraints — treat their failures as "my change broke a documented rule", never as a broken check:
+
+- `src/design/theme-contract.spec.ts` — the Design Constraints below, asserted against all built themes (base/pmm/sep × light/dark). Fix the theme change; never edit the expectations to make it pass.
+- `src/components/nav-item/nav-item.spec.tsx` — NavItem's icon-less alignment spacer.
+- `src/maturity-tags.spec.ts` — story maturity tag coverage.
+- ESLint `no-restricted-imports` — MUI barrel imports and raw `deepmerge` (messages say what to use instead).
 
 ### Known non-blocking warnings
 
@@ -61,8 +69,8 @@ Barrel imports (`@mui/material`, `@mui/icons-material`) hurt dev startup/rebuild
 
 - **Components:** `import Button from '@mui/material/Button'` — not `import { Button } from '@mui/material'`.
 - **Icons:** `import Delete from '@mui/icons-material/Delete'` — not the barrel.
-- **Migrate existing barrels:** `npx @mui/codemod@latest v5.0.0/path-imports <path>`.
-- **Optional ESLint guard:** `no-restricted-imports` with `{ "regex": "^@mui/[^/]+$" }` blocks package-root barrels only.
+- **Types:** `Theme`, `SxProps`, `PaletteMode`, `ThemeOptions` etc. come from `'@mui/material/styles'`; `XxxProps` from the component module (`import { ButtonProps } from '@mui/material/Button'`).
+- **Enforced:** `no-restricted-imports` in `eslint.config.mjs` blocks `@mui/*` package roots (and raw `@mui/utils/deepmerge` outside `merge-theme-options.ts`). For bulk migrations elsewhere: `npx @mui/codemod@latest v5.0.0/path-imports <path>` — but it mangles prop-type imports, hand-check those.
 - **VS Code nudge:** `typescript.preferences.autoImportSpecifierExcludeRegexes: ["^@mui/[^/]+$"]` in `.vscode/settings.json`.
 
 ### Theme overrides — gotchas
@@ -71,6 +79,8 @@ Barrel imports (`@mui/material`, `@mui/icons-material`) hurt dev startup/rebuild
 - **MUI v7 drives hover backgrounds via CSS custom properties.** E.g. `IconButton`'s hover bg is `var(--IconButton-hoverBg)`, set per-variant. Override by setting the CSS var on the right slot (e.g. `"--IconButton-hoverBg": theme.palette.action.hover` in `colorSecondary`), not `"&:hover": { backgroundColor: ... }`. Grep `--{Component}-` in MUI source first.
 
 ## Design Constraints (non-obvious — verify before "normalizing")
+
+These are enforced by `src/design/theme-contract.spec.ts` (NavItem by `nav-item.spec.tsx`). If one of those tests fails, your change broke a constraint below — fix the change, don't touch the test.
 
 ### Chip
 
