@@ -7,8 +7,7 @@ import {
   UseControllerProps,
 } from 'react-hook-form';
 import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
-import { TextFieldProps } from '@mui/material/TextField';
+import TextField, { type TextFieldProps } from '@mui/material/TextField';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 
 type FileInputProps<T extends FieldValues = FieldValues> = {

@@ -1,4 +1,5 @@
 import type { ThemeOptions } from '@mui/material/styles';
+// eslint-disable-next-line no-restricted-imports -- the one wrapped call site
 import deepmerge from '@mui/utils/deepmerge';
 
 type StyleOverrideFn = (props: unknown) => Record<string, unknown>;

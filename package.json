@@ -6,15 +6,15 @@
   "scripts": {
     "build": "rollup -c",
     "build:watch": "rollup -c -w",
-    "typecheck": "tsc -p tsconfig.json && tsc -p .storybook/tsconfig.json",
-    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json && tsc -p .storybook/tsconfig.json",
+    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\" \".storybook/**/*.{ts,tsx,js,jsx}\"",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "storybook:dev": "storybook dev -p 6006 --no-open",
     "storybook:build": "storybook build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "prepack": "pnpm build"
   },
   "main": "dist/index.js",

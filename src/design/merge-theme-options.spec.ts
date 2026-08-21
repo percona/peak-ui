@@ -80,7 +80,9 @@ describe('mergeThemeOptions', () => {
       },
     });
 
-    const inlineCode = merged.components?.MuiCssBaseline?.styleOverrides?.['code:not(pre code)'];
+    const inlineCode = (
+      merged.components?.MuiCssBaseline?.styleOverrides as Record<string, unknown> | undefined
+    )?.['code:not(pre code)'];
 
     expect(inlineCode).toMatchObject({ color: 'hotpink' });
     expect(inlineCode).toHaveProperty('fontFamily');
@@ -155,7 +157,7 @@ describe('mergeThemeOptions', () => {
     const override: ThemeOptions = {
       components: {
         MuiCard: {
-          variants: [{ props: { variant: 'brand' }, style: { border: '1px solid blue' } }],
+          variants: [{ props: { variant: 'brand' } as never, style: { border: '1px solid blue' } }],
         },
       },
     };

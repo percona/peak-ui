@@ -1,18 +1,12 @@
 import { ReactNode } from 'react';
 import { kebabize } from '@/utils';
 
-import MuiCard from '@mui/material/Card';
-import Typography from '@mui/material/Typography';
-import { CardProps as MuiCardProps } from '@mui/material/Card';
-import { ButtonProps } from '@mui/material/Button';
-import { TypographyProps } from '@mui/material/Typography';
-import { CardContentProps } from '@mui/material/CardContent';
-import { BoxProps } from '@mui/material/Box';
-import { CardActionsProps } from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import CardActions from '@mui/material/CardActions';
+import MuiCard, { type CardProps as MuiCardProps } from '@mui/material/Card';
+import Typography, { type TypographyProps } from '@mui/material/Typography';
+import Button, { type ButtonProps } from '@mui/material/Button';
+import CardContent, { type CardContentProps } from '@mui/material/CardContent';
+import Box, { type BoxProps } from '@mui/material/Box';
+import CardActions, { type CardActionsProps } from '@mui/material/CardActions';
 
 export interface CardProps extends Omit<MuiCardProps, 'content'> {
   content: ReactNode;

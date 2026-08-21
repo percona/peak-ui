@@ -1,7 +1,6 @@
 import LabeledContent, { LabeledContentProps } from '../labeled-content';
 
-import Button from '@mui/material/Button';
-import { ButtonProps } from '@mui/material/Button';
+import Button, { type ButtonProps } from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 

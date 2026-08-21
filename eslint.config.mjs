@@ -6,13 +6,13 @@ import storybook from 'eslint-plugin-storybook';
 import prettierConfig from 'eslint-config-prettier';
 
 const muiBarrelPattern = {
-  regex: '^@mui/[^/]+$',
+  regex: '^@mui/[^/]+(/index(\\.js)?)?$',
   message:
     "Barrel imports hurt dev startup/rebuild. Use path imports: import Button from '@mui/material/Button'; types live in '@mui/material/styles'.",
 };
 
 const deepmergePattern = {
-  regex: '^@mui/utils/deepmerge$',
+  regex: '^@mui/utils/deepmerge(/.*)?$',
   message:
     'Raw deepmerge replaces styleOverrides/variants instead of composing them. Use mergeThemeOptions (src/design/merge-theme-options.ts).',
 };
@@ -35,13 +35,6 @@ export default tseslint.config(
     },
     settings: {
       react: { version: 'detect' },
-    },
-  },
-  {
-    // The one legitimate deepmerge call site: mergeThemeOptions itself wraps it.
-    files: ['src/design/merge-theme-options.ts'],
-    rules: {
-      'no-restricted-imports': ['error', { patterns: [muiBarrelPattern] }],
     },
   },
   {

@@ -10,11 +10,11 @@ PEAK UI (`@percona/peak-ui`) is a React + MUI v7 component library published as 
 - **Build watch:** `pnpm build:watch`
 - **Storybook dev:** `pnpm storybook:dev` (port 6006, headless via `--no-open`)
 - **Storybook build:** `pnpm storybook:build`
-- **Type check:** `pnpm typecheck` (app + `.storybook` tsconfigs)
-- **Lint:** `pnpm lint` (ESLint over `src`)
+- **Type check:** `pnpm typecheck` (app + spec + `.storybook` tsconfigs)
+- **Lint:** `pnpm lint` (ESLint over `src` and `.storybook`)
 - **Format:** `pnpm format` (Prettier write) · **check only:** `pnpm format:check`
 - **Test:** `pnpm test` (Vitest, run once) · **watch:** `pnpm test:watch`
-- **Verify (full gate):** `pnpm verify` (typecheck + lint + format:check + test)
+- **Verify (full gate):** `pnpm verify` (format:check + lint + typecheck + test, cheapest first)
 
 ## Verification (MANDATORY after any code change)
 
@@ -101,7 +101,7 @@ The `<Box sx={{ mr: -1.75 }} />` rendered when no `icon` is passed is intentiona
 Two parallel layers, intentionally distinct — don't collapse them:
 
 - **`palette.action.{active,hover,selected,disabled,focus}`** = neutral state tints, brand-black-tinted in all themes; used wherever the surface is default-colored.
-- **`palette.primary.{hover,selected,focus,focusVisible,outlinedBorder}`** = state tints for *primary-colored* surfaces. Identical to `action.*` in Base (both brand-black) but diverges in PMM/SEP (purple).
+- **`palette.primary.{hover,selected,focus,focusVisible,outlinedBorder}`** = state tints for *primary-colored* surfaces. In Base they stay neutral (identical to `action.*` in light mode; white-based at slightly different alphas in dark mode) but diverge in PMM/SEP (purple).
 - Per-mode opacity is mandatory: dark mode uses higher alpha (8% hover vs 4% light, 16% selected vs 8% light, 15% disabled/focus vs 12% light), wired through `tokens.action.{hoverOpacity,selectedOpacity,disabledOpacity,focusOpacity}` so MUI's `alpha(...)` calculations stay in sync.
 
 ### Theme extension contract

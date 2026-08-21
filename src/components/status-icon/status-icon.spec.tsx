@@ -1,11 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { baseThemeOptions, ThemeContextProvider } from '../../design';
 import StatusIcon from './status-icon';
 import { type StatusIconSeverity, type StatusIconSize } from './status-icon.types';
-
-const renderWithTheme = (ui: React.ReactElement) =>
-  render(<ThemeContextProvider themeOptions={baseThemeOptions}>{ui}</ThemeContextProvider>);
+import { renderWithTheme } from '../../test-utils';
 
 const SEVERITIES: StatusIconSeverity[] = ['success', 'info', 'indeterminate', 'warning', 'error'];
 const SIZES: StatusIconSize[] = ['medium', 'small'];

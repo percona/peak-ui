@@ -1,29 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import { createTheme } from '@mui/material/styles';
 import NavItem from '.';
-import { baseThemeOptions, ThemeContextProvider } from '../../design';
+import { baseThemeOptions } from '../../design';
+import { renderWithTheme } from '../../test-utils';
 
-const renderWithTheme = (ui: ReactElement) =>
-  render(<ThemeContextProvider themeOptions={baseThemeOptions}>{ui}</ThemeContextProvider>);
+// AGENTS.md NavItem constraint: icon-less rows keep a mr:-1.75 spacer so text start-lines align. Fix the component, not this spec.
+const spacerMargin = createTheme(baseThemeOptions('light')).spacing(-1.75);
 
-// Executable contract for the NavItem entry in AGENTS.md "Design Constraints":
-// icon-less rows render a negative-margin spacer so text start-lines align
-// with icon-bearing rows. Fix regressions in the component, not here.
+const leadingSlot = (container: HTMLElement) =>
+  container.querySelector('.MuiListItemButton-root')?.firstElementChild;
+
 describe('NavItem icon alignment contract', () => {
   it('renders the alignment spacer when no icon is given', () => {
     const { container } = renderWithTheme(<NavItem text="Databases" />);
     expect(container.querySelector('.MuiListItemIcon-root')).toBeNull();
-    const spacer = container.querySelector('.MuiBox-root');
-    expect(spacer, 'the icon-less spacer Box preserves text start-line alignment').not.toBeNull();
-    expect(spacer).toHaveStyle({ marginRight: '-14px' });
+    const spacer = leadingSlot(container);
+    expect(
+      spacer?.classList.contains('MuiBox-root'),
+      'the leading slot must be the alignment spacer Box'
+    ).toBe(true);
+    expect(spacer).toHaveStyle({ marginRight: spacerMargin });
   });
 
-  it('renders the icon slot without the spacer when an icon is given', () => {
+  it('renders the icon in the leading slot instead of the spacer', () => {
     const { container } = renderWithTheme(
       <NavItem text="Databases" icon={<svg data-testid="icon" />} />
     );
-    expect(container.querySelector('.MuiListItemIcon-root')).not.toBeNull();
-    expect(container.querySelector('.MuiBox-root')).toBeNull();
+    const slot = leadingSlot(container);
+    expect(slot?.classList.contains('MuiListItemIcon-root'), 'icon replaces the spacer').toBe(true);
+    expect(slot?.classList.contains('MuiBox-root')).toBe(false);
   });
 });
