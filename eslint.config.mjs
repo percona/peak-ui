@@ -5,6 +5,18 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import storybook from 'eslint-plugin-storybook';
 import prettierConfig from 'eslint-config-prettier';
 
+const muiBarrelPattern = {
+  regex: '^@mui/[^/]+(/index(\\.js)?)?$',
+  message:
+    "Barrel imports hurt dev startup/rebuild. Use path imports: import Button from '@mui/material/Button'; types live in '@mui/material/styles'.",
+};
+
+const deepmergePattern = {
+  regex: '^@mui/utils/deepmerge(/.*)?$',
+  message:
+    'Raw deepmerge replaces styleOverrides/variants instead of composing them. Use mergeThemeOptions (src/design/merge-theme-options.ts).',
+};
+
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -19,6 +31,7 @@ export default tseslint.config(
       ...reactHooksPlugin.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
+      'no-restricted-imports': ['error', { patterns: [muiBarrelPattern, deepmergePattern] }],
     },
     settings: {
       react: { version: 'detect' },

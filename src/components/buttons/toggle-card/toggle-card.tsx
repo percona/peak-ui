@@ -1,5 +1,7 @@
-import { ToggleButton, useTheme } from '@mui/material';
 import { ToggleCardProps } from './toggle-card.types';
+
+import ToggleButton from '@mui/material/ToggleButton';
+import { useTheme } from '@mui/material/styles';
 
 const ToggleCard = ({ children, sx, ...props }: ToggleCardProps) => {
   const theme = useTheme();

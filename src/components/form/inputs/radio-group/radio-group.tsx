@@ -1,7 +1,10 @@
-import { FormControlLabel, RadioGroup as MuiRadioGroup, Radio } from '@mui/material';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import LabeledContent from '../../../labeled-content';
 import { RadioGroupProps } from './radio-group.types';
+
+import FormControlLabel from '@mui/material/FormControlLabel';
+import MuiRadioGroup from '@mui/material/RadioGroup';
+import Radio from '@mui/material/Radio';
 
 const RadioGroup = <T extends FieldValues = FieldValues>({
   name,

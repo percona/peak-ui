@@ -1,7 +1,3 @@
-import { IconButton } from '@mui/material';
-import { TextField } from '@mui/material';
-import { Upgrade as UpgradeIcon } from '@mui/icons-material';
-import { TextFieldProps } from '@mui/material';
 import {
   Control,
   Controller,
@@ -10,6 +6,9 @@ import {
   useFormContext,
   UseControllerProps,
 } from 'react-hook-form';
+import IconButton from '@mui/material/IconButton';
+import TextField, { type TextFieldProps } from '@mui/material/TextField';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 
 type FileInputProps<T extends FieldValues = FieldValues> = {
   name: FieldPath<T>;

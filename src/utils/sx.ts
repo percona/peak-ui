@@ -1,4 +1,4 @@
-import type { SxProps, Theme } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 const flattenSx = (sx: SxProps<Theme>, theme: Theme): Record<string, unknown> => {
   if (typeof sx === 'function') return (sx as (t: Theme) => Record<string, unknown>)(theme);

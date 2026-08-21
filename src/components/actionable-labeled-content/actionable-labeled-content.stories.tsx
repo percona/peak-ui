@@ -3,7 +3,7 @@ import * as DocBlock from '@storybook/addon-docs/blocks';
 import ActionableLabeledContent, {
   ActionableLabeledContentProps,
 } from './actionable-labeled-content';
-import { TextField } from '@mui/material';
+import TextField from '@mui/material/TextField';
 
 const meta = {
   title: 'To be reviewed/ActionableLabeledContent',

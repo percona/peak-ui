@@ -13,8 +13,10 @@
 // limitations under the License.
 
 import { LabeledContentProps } from '../../../labeled-content';
-import { FormControlProps, SelectProps } from '@mui/material';
 import { Control, FieldPath, FieldValues, UseControllerProps } from 'react-hook-form';
+
+import { FormControlProps } from '@mui/material/FormControl';
+import { SelectProps } from '@mui/material/Select';
 
 export type SelectInputProps<T extends FieldValues = FieldValues> = {
   control?: Control<T>;

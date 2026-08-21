@@ -1,4 +1,4 @@
-import { PickerValidDate } from '@mui/x-date-pickers';
+import { PickerValidDate } from '@mui/x-date-pickers/models';
 import { DateTimePickerValueFormat, DateTimePickerValueTransform } from './date-time-picker.types';
 import { toValidPickerDate } from './date-time-picker.utils';
 

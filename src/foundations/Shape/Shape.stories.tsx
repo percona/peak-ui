@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Typography } from '@mui/material';
 import { shape } from '../../design/themes/base';
+
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const meta = {
   title: 'Foundations/Shape',

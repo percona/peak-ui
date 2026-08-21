@@ -1,6 +1,8 @@
 import { Fragment } from 'react';
-import { Stepper as MuiStepper, useTheme } from '@mui/material';
 import { StepperProps } from './stepper.types';
+
+import MuiStepper from '@mui/material/Stepper';
+import { useTheme } from '@mui/material/styles';
 
 const Stepper = ({ noConnector, connector, dataTestId, sx, ...props }: StepperProps) => {
   const theme = useTheme();

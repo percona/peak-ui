@@ -2,7 +2,8 @@ import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 
 import { kebabize } from '@/utils';
 import { DateTimePickerInputProps, DateTimePickerValueTransform } from './date-time-picker.types';
-import { DateTimePicker, PickerValidDate } from '@mui/x-date-pickers';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { PickerValidDate } from '@mui/x-date-pickers/models';
 import { presets } from './date-time-picker.constants';
 
 const DateTimePickerInput = <

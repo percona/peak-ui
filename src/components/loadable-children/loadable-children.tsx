@@ -1,6 +1,6 @@
 import React from 'react';
-import { Skeleton } from '@mui/material';
 import { LoadableChildrenProps } from './loadable-children.types';
+import Skeleton from '@mui/material/Skeleton';
 
 const LoadableChildren = ({ children, loading, skeletonProps }: LoadableChildrenProps) => (
   <>

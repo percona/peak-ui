@@ -1,12 +1,7 @@
 import { ReactNode } from 'react';
-import {
-  Card as MuiCard,
-  CardProps as MuiCardProps,
-  CardContent,
-  CardContentProps,
-  CardHeader,
-  CardHeaderProps,
-} from '@mui/material';
+import MuiCard, { type CardProps as MuiCardProps } from '@mui/material/Card';
+import CardContent, { type CardContentProps } from '@mui/material/CardContent';
+import CardHeader, { type CardHeaderProps } from '@mui/material/CardHeader';
 
 export interface OverviewCardProps extends Omit<MuiCardProps, 'content'> {
   cardHeaderProps?: CardHeaderProps;

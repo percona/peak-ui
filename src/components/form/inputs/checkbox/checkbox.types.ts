@@ -1,6 +1,6 @@
 import { Control, FieldPath, FieldValues, UseControllerProps } from 'react-hook-form';
-import { CheckboxProps as MUICheckboxProps } from '@mui/material';
 import { LabeledContentProps } from '../../..';
+import { CheckboxProps as MUICheckboxProps } from '@mui/material/Checkbox';
 
 export type CheckboxProps<T extends FieldValues = FieldValues> = {
   name: FieldPath<T>;

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Typography, type TypographyProps } from '@mui/material';
+import Typography, { type TypographyProps } from '@mui/material/Typography';
 
 const meta = {
   title: 'Foundations/Typography',
