@@ -32,7 +32,7 @@ Icons: search `@mui/icons-material` first; the custom icons listed under Icons e
 
 - [PageContainer](https://percona.github.io/peak-ui/?path=/docs/layout-pagecontainer--docs): Centered page content column with side padding; caps the width at `maxWidth` (default `DEFAULT_PAGE_MAX_WIDTH`, 1000px, applied from the `lg` breakpoint up) or stretches with `maxWidth="full"`. It is an MUI `Stack`, so it accepts `spacing`. Use it as the root of every page instead of MUI `Container`. Types `PageContainerProps`, `PageContainerMaxWidth`.
 - [DEFAULT_PAGE_MAX_WIDTH](https://github.com/percona/peak-ui/blob/main/src/components/page-container/page-container.tsx): The default `PageContainer` width in pixels (1000).
-- [PageHeader](https://percona.github.io/peak-ui/?path=/docs/layout-pageheader--docs): The top of a page, an h1 title with optional decorative icon and badge, a one-line description, actions that wrap under the description on narrow screens, and a toolbar row; use it as the first child of `PageContainer` instead of a hand-made title row. Type `PageHeaderProps`.
+- [PageHeader](https://percona.github.io/peak-ui/?path=/docs/layout-pageheader--docs): The top of a page, an h1 title with optional decorative icon and badge, a one-line description, actions that move under the description when the header is narrow, and a toolbar row; use it as the first child of `PageContainer` instead of a hand-made title row. Type `PageHeaderProps`.
 
 ## Form inputs bound to react-hook-form
 

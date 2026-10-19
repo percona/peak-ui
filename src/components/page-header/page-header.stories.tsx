@@ -85,7 +85,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar row for page-wide filters. Use it as the first child of `PageContainer`. From `md` the actions sit right of the title, centred on its first line; below `md` they move under the description. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.',
+          "The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar row for page-wide filters. Use it as the first child of `PageContainer`. Once the header itself is `md` (900px) wide, the actions sit right of the title, centred on its first line, and take at most half the row; narrower, they move under the description. The header's own width decides, not the viewport's, so a docked sidebar beside the page counts. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.",
       },
     },
   },
@@ -166,28 +166,53 @@ export const LongTitle: Story = {
 };
 
 export const Narrow: Story = {
-  globals: { viewport: { value: '360-800', isRotated: false } },
+  parameters: {
+    docs: {
+      description: {
+        story: 'At 360px the actions and the toolbar move under the description and wrap.',
+      },
+    },
+  },
+  render: (args) => (
+    <Box sx={{ width: 360 }}>
+      <PageHeader {...args} />
+    </Box>
+  ),
+  args: WithToolbar.args,
+};
+
+export const BesideSidebar: Story = {
+  name: 'Beside a docked sidebar',
   parameters: {
     docs: {
       description: {
         story:
-          'At 360px the actions and the toolbar move under the description and wrap. Open the story on its own to see the viewport applied.',
+          'A 900px viewport with a docked 289px sidebar and the page padding leaves the header about 530px. It is narrower than `md` itself, so it stays stacked instead of squeezing the title beside the actions.',
       },
     },
   },
+  render: (args) => (
+    <Box sx={{ width: 532 }}>
+      <PageHeader {...args} />
+    </Box>
+  ),
   args: WithToolbar.args,
 };
 
 export const Medium: Story = {
-  globals: { viewport: { value: '900-800', isRotated: false } },
   parameters: {
     docs: {
       description: {
         story:
-          'From 900px (`md`) the actions move up beside the title. Open the story on its own to see the viewport applied.',
+          'From 900px (`md`) of its own width the actions move up beside the title. They take at most half the row and wrap inside it, so the title keeps the other half.',
       },
     },
   },
+  render: (args) => (
+    <Box sx={{ width: 900 }}>
+      <PageHeader {...args} />
+    </Box>
+  ),
   args: WithToolbar.args,
 };
 

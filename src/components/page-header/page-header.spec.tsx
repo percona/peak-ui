@@ -11,6 +11,22 @@ import PageHeader from './page-header';
 const theme = createTheme(getThemeOptions('pmm')('light'));
 const inTheme = (node: ReactNode) => <ThemeProvider theme={theme}>{node}</ThemeProvider>;
 
+// jsdom does no layout, so read the declarations an at-rule would apply to the element.
+const conditionalStyles = (element: Element, atRule: '@container' | '@media') =>
+  [...document.styleSheets]
+    .flatMap((sheet) => [...sheet.cssRules])
+    .filter((rule): rule is CSSConditionRule => rule.cssText.startsWith(atRule))
+    .flatMap((rule) =>
+      [...rule.cssRules]
+        .filter(
+          (inner): inner is CSSStyleRule =>
+            inner instanceof CSSStyleRule &&
+            !inner.selectorText.includes('::') &&
+            element.matches(inner.selectorText)
+        )
+        .map((inner) => ({ query: `${atRule} ${rule.conditionText}`, style: inner.style }))
+    );
+
 describe('PageHeader', () => {
   it('renders the title as the page h1 in the h2 style by default', () => {
     render(inTheme(<PageHeader title="MongoDB" />));
@@ -77,9 +93,70 @@ describe('PageHeader', () => {
     );
 
     const root = container.firstElementChild as HTMLElement;
+    const grid = root.firstElementChild as HTMLElement;
     expect(root.children).toHaveLength(1);
-    expect(root.firstElementChild?.children).toHaveLength(1);
-    expect(root.firstElementChild?.firstElementChild?.tagName).toBe('H1');
+    expect(grid.children).toHaveLength(1);
+    expect(grid.firstElementChild?.children).toHaveLength(1);
+    expect(grid.firstElementChild?.firstElementChild?.tagName).toBe('H1');
+  });
+
+  it('stacks until the header itself is md wide, whatever the viewport', () => {
+    const { container } = render(
+      inTheme(
+        <PageHeader
+          title="MongoDB"
+          description="3 clusters"
+          actions={<Button>Add service</Button>}
+          toolbar={<Button>Refresh</Button>}
+        />
+      )
+    );
+
+    const root = container.firstElementChild as HTMLElement;
+    const grid = root.firstElementChild as HTMLElement;
+    const actionsRow = screen.getByRole('button', { name: 'Add service' }).parentElement!;
+    const wideQuery = theme.containerQueries.up('md');
+
+    expect(getComputedStyle(root).getPropertyValue('container-type')).toBe('inline-size');
+    expect(getComputedStyle(grid).gridTemplateAreas).toBe(
+      '"title" "description" "actions" "toolbar"'
+    );
+    expect(getComputedStyle(actionsRow).justifyContent).toBe('flex-start');
+    expect(conditionalStyles(grid, '@media')).toEqual([]);
+    expect(conditionalStyles(actionsRow, '@media')).toEqual([]);
+
+    const [wideGrid, ...otherGrid] = conditionalStyles(grid, '@container');
+    expect(otherGrid).toEqual([]);
+    expect(wideGrid.query).toBe(wideQuery);
+    expect(wideGrid.style.getPropertyValue('grid-template-areas')).toBe(
+      '"title actions" "description description" "toolbar toolbar"'
+    );
+    expect(
+      conditionalStyles(actionsRow, '@container').map(({ query, style }) => [
+        query,
+        style.justifyContent,
+      ])
+    ).toEqual([[wideQuery, 'flex-end']]);
+  });
+
+  it('gives the actions at most half the row beside the title', () => {
+    const { container } = render(
+      inTheme(<PageHeader title="MongoDB" actions={<Button>Add service</Button>} />)
+    );
+
+    const grid = container.firstElementChild?.firstElementChild as HTMLElement;
+    const [wideGrid] = conditionalStyles(grid, '@container');
+    expect(wideGrid.style.getPropertyValue('grid-template-columns')).toBe(
+      'minmax(0, 1fr) fit-content(50%)'
+    );
+  });
+
+  it('sizes the title by its longest word, not by a single letter', () => {
+    render(inTheme(<PageHeader title="MongoDB" />));
+
+    expect(getComputedStyle(screen.getByRole('heading', { level: 1 })).overflowWrap).toBe(
+      'break-word'
+    );
   });
 
   it('renders the description as secondary body text', () => {
