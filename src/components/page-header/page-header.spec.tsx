@@ -187,6 +187,60 @@ describe('PageHeader', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('puts an inline toolbar on the title row, before the actions, once the header is md wide', () => {
+    const { container } = render(
+      inTheme(
+        <PageHeader
+          title="MongoDB"
+          description="3 clusters"
+          actions={<Button>Add MongoDB</Button>}
+          toolbar={<Button>Refresh</Button>}
+          toolbarPlacement="inline"
+        />
+      )
+    );
+
+    const grid = container.firstElementChild?.firstElementChild as HTMLElement;
+    const [wideGrid] = conditionalStyles(grid, '@container');
+
+    expect(getComputedStyle(grid).gridTemplateAreas).toBe(
+      '"title" "description" "toolbar" "actions"'
+    );
+    expect(wideGrid.style.getPropertyValue('grid-template-areas')).toBe(
+      '"title toolbar actions" "description description description"'
+    );
+    expect(wideGrid.style.getPropertyValue('grid-template-columns')).toBe(
+      'auto minmax(0, 1fr) auto'
+    );
+    expect(wideGrid.style.getPropertyValue('align-items')).toBe('center');
+
+    const refresh = screen.getByRole('button', { name: 'Refresh' });
+    const add = screen.getByRole('button', { name: 'Add MongoDB' });
+    expect(refresh.compareDocumentPosition(add) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('keeps the toolbar below without the inline placement, and without a toolbar ignores it', () => {
+    const { container } = render(inTheme(<PageHeader title="MongoDB" toolbarPlacement="inline" />));
+
+    const grid = container.firstElementChild?.firstElementChild as HTMLElement;
+    const [wideGrid] = conditionalStyles(grid, '@container');
+    expect(wideGrid.style.getPropertyValue('grid-template-areas')).toBe('"title"');
+    expect(wideGrid.style.getPropertyValue('grid-template-columns')).toBe('minmax(0, 1fr)');
+  });
+
+  it('draws a divider under the header when asked', () => {
+    const { container, rerender } = render(inTheme(<PageHeader title="MongoDB" divider />));
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(getComputedStyle(root).borderBottom).toContain('1px solid');
+    rerender(inTheme(<PageHeader title="MongoDB" />));
+    expect(getComputedStyle(container.firstElementChild as HTMLElement).borderBottomStyle).not.toBe(
+      'solid'
+    );
+  });
+
   it('forwards the ref and the root props', () => {
     const ref = createRef<HTMLDivElement>();
     render(inTheme(<PageHeader ref={ref} title="MongoDB" data-testid="header" id="page-header" />));

@@ -25,23 +25,48 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
       description,
       actions,
       toolbar,
+      toolbarPlacement = 'below',
+      divider = false,
       sx,
       ...rest
     },
     ref
   ) => {
-    const fullRow = (area: string) => (actions ? `"${area} ${area}"` : `"${area}"`);
+    const inline = toolbarPlacement === 'inline' && !!toolbar;
+    const wideColumns = [
+      inline ? 'auto' : 'minmax(0, 1fr)',
+      inline && 'minmax(0, 1fr)',
+      actions && (inline ? 'auto' : 'fit-content(50%)'),
+    ].filter(Boolean);
+    const fullRow = (area: string) => `"${wideColumns.map(() => area).join(' ')}"`;
+    // Reading order follows the row: an inline toolbar comes before the actions.
     const narrowAreas = [
       '"title"',
       description && '"description"',
+      inline && '"toolbar"',
       actions && '"actions"',
-      toolbar && '"toolbar"',
+      !inline && toolbar && '"toolbar"',
     ];
     const wideAreas = [
-      actions ? '"title actions"' : '"title"',
+      `"${['title', inline && 'toolbar', actions && 'actions'].filter(Boolean).join(' ')}"`,
       description && fullRow('description'),
-      toolbar && fullRow('toolbar'),
+      !inline && toolbar && fullRow('toolbar'),
     ];
+    const toolbarRow = toolbar && (
+      <Box
+        sx={{
+          gridArea: 'toolbar',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: inline ? 3 : 1,
+          minWidth: 0,
+          mt: inline ? 0 : 1,
+        }}
+      >
+        {toolbar}
+      </Box>
+    );
 
     // Icon and badge centre on the title's first line, so a wrapping title keeps them beside it.
     const besideTitle = (theme: Theme) => ({
@@ -54,7 +79,12 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
     return (
       <Box
         ref={ref}
-        sx={[{ containerType: 'inline-size' }, ...(Array.isArray(sx) ? sx : [sx])]}
+        sx={[
+          { containerType: 'inline-size' },
+          divider &&
+            ((theme: Theme) => ({ pb: 2, borderBottom: `1px solid ${theme.palette.divider}` })),
+          ...(Array.isArray(sx) ? sx : [sx]),
+        ]}
         {...rest}
       >
         <Box
@@ -62,11 +92,12 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
             display: 'grid',
             gridTemplateColumns: 'minmax(0, 1fr)',
             gridTemplateAreas: narrowAreas.filter(Boolean).join(' '),
-            columnGap: 2,
+            columnGap: inline ? 3 : 2,
             rowGap: 1,
             [wide(theme)]: {
-              gridTemplateColumns: actions ? 'minmax(0, 1fr) fit-content(50%)' : 'minmax(0, 1fr)',
+              gridTemplateColumns: wideColumns.join(' '),
               gridTemplateAreas: wideAreas.filter(Boolean).join(' '),
+              ...(inline && { alignItems: 'center' }),
             },
           })}
         >
@@ -109,6 +140,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
               {description}
             </Typography>
           )}
+          {inline && toolbarRow}
           {actions && (
             <Box
               sx={(theme) => ({
@@ -116,7 +148,10 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
                 display: 'flex',
                 alignItems: 'center',
                 alignSelf: 'start',
-                [wide(theme)]: { '&::before': titleLineStrut(theme, titleVariant) },
+                // Inline, the row centres everything, so the actions need no title-line strut.
+                [wide(theme)]: inline
+                  ? { alignSelf: 'center' }
+                  : { '&::before': titleLineStrut(theme, titleVariant) },
               })}
             >
               <Box
@@ -133,21 +168,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
               </Box>
             </Box>
           )}
-          {toolbar && (
-            <Box
-              sx={{
-                gridArea: 'toolbar',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                gap: 1,
-                minWidth: 0,
-                mt: 1,
-              }}
-            >
-              {toolbar}
-            </Box>
-          )}
+          {!inline && toolbarRow}
         </Box>
       </Box>
     );

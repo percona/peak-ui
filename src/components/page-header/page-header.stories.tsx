@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AddOutlined from '@mui/icons-material/AddOutlined';
+import MoreVertOutlined from '@mui/icons-material/MoreVertOutlined';
 import RefreshRounded from '@mui/icons-material/RefreshRounded';
 import Chip from '../chip';
 import { PerconaMoIcon } from '../icons';
@@ -85,7 +86,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar row for page-wide filters. Use it as the first child of `PageContainer`. Once the header itself is `md` (900px) wide, the actions sit right of the title, centred on its first line, and take at most half the row; narrower, they move under the description. The header's own width decides, not the viewport's, so a docked sidebar beside the page counts. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.",
+          "The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar for page-wide filters, in its own row or, with `toolbarPlacement=\"inline\"`, on the title's row. `divider` draws a rule under it. Use it as the first child of `PageContainer`. Once the header itself is `md` (900px) wide, the actions sit right of the title, centred on its first line, and take at most half the row; narrower, they move under the description. The header's own width decides, not the viewport's, so a docked sidebar beside the page counts. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.",
       },
     },
   },
@@ -106,6 +107,7 @@ const meta = {
     description: { control: false },
     actions: { control: false },
     toolbar: { control: false },
+    toolbarPlacement: { control: { type: 'inline-radio' }, options: ['below', 'inline'] },
   },
 } satisfies Meta<typeof PageHeader>;
 
@@ -144,6 +146,27 @@ export const WithToolbar: Story = {
     description: statusLine,
     actions,
     toolbar,
+  },
+};
+
+// The hub layout: scope and freshness on the title's row, quiet actions at its end, a rule under it.
+export const InlineToolbar: Story = {
+  args: {
+    titleVariant: 'h3',
+    icon: <PerconaMoIcon sx={{ fontSize: 36 }} />,
+    toolbar,
+    toolbarPlacement: 'inline',
+    divider: true,
+    actions: (
+      <>
+        <Button variant="text" startIcon={<AddOutlined />}>
+          Add MongoDB
+        </Button>
+        <IconButton aria-label="More actions">
+          <MoreVertOutlined />
+        </IconButton>
+      </>
+    ),
   },
 };
 
