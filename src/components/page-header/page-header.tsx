@@ -47,6 +47,12 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
       actions && '"actions"',
       !inline && toolbar && '"toolbar"',
     ];
+    const twoRows = inline && !!actions;
+    const mediumAreas = [
+      '"title actions"',
+      description && '"description description"',
+      '"toolbar toolbar"',
+    ];
     const wideAreas = [
       `"${['title', inline && 'toolbar', actions && 'actions'].filter(Boolean).join(' ')}"`,
       description && fullRow('description'),
@@ -59,7 +65,9 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
-          gap: inline ? 3 : 1,
+          // Wrapped onto its own line, a toolbar item sits close under the one before it.
+          columnGap: inline ? 3 : 1,
+          rowGap: 0.25,
           minWidth: 0,
           mt: inline ? 0 : 1,
         }}
@@ -90,13 +98,16 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
         <Box
           sx={(theme) => ({
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr)',
-            gridTemplateAreas: narrowAreas.filter(Boolean).join(' '),
-            columnGap: inline ? 3 : 2,
-            rowGap: 1,
+            // Below md an inline toolbar takes its own row, and the actions keep their place beside the title.
+            gridTemplateColumns: twoRows ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr)',
+            gridTemplateAreas: (twoRows ? mediumAreas : narrowAreas).filter(Boolean).join(' '),
+            // Beside the actions on a narrow header the title gets the room a 24px gap would take.
+            columnGap: inline && !twoRows ? 3 : 2,
+            rowGap: 2,
             [wide(theme)]: {
               gridTemplateColumns: wideColumns.join(' '),
               gridTemplateAreas: wideAreas.filter(Boolean).join(' '),
+              ...(inline && { columnGap: 3 }),
               ...(inline && { alignItems: 'center' }),
             },
           })}
@@ -147,7 +158,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
                 gridArea: 'actions',
                 display: 'flex',
                 alignItems: 'center',
-                alignSelf: 'start',
+                alignSelf: twoRows ? 'center' : 'start',
                 // Inline, the row centres everything, so the actions need no title-line strut.
                 [wide(theme)]: inline
                   ? { alignSelf: 'center' }
@@ -159,7 +170,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
                   display: 'flex',
                   flexWrap: 'wrap',
                   alignItems: 'center',
-                  justifyContent: 'flex-start',
+                  justifyContent: twoRows ? 'flex-end' : 'flex-start',
                   gap: 1,
                   [wide(theme)]: { justifyContent: 'flex-end' },
                 })}

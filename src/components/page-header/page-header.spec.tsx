@@ -201,10 +201,14 @@ describe('PageHeader', () => {
     );
 
     const grid = container.firstElementChild?.firstElementChild as HTMLElement;
-    const [wideGrid] = conditionalStyles(grid, '@container');
+    const rules = conditionalStyles(grid, '@container');
+    const at = (breakpoint: 'sm' | 'md') =>
+      rules.find(({ query }) => query === theme.containerQueries.up(breakpoint))?.style;
+    const wideGrid = { style: at('md') as CSSStyleDeclaration };
 
+    // Below md the actions stay beside the title and the toolbar takes the next row.
     expect(getComputedStyle(grid).gridTemplateAreas).toBe(
-      '"title" "description" "toolbar" "actions"'
+      '"title actions" "description description" "toolbar toolbar"'
     );
     expect(wideGrid.style.getPropertyValue('grid-template-areas')).toBe(
       '"title toolbar actions" "description description description"'
