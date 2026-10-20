@@ -152,7 +152,6 @@ export const WithToolbar: Story = {
 // The hub layout: scope and freshness on the title's row, quiet actions at its end, a rule under it.
 export const InlineToolbar: Story = {
   args: {
-    titleVariant: 'h3',
     icon: <PerconaMoIcon sx={{ fontSize: 36 }} />,
     toolbar,
     toolbarPlacement: 'inline',

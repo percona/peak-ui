@@ -28,11 +28,11 @@ const conditionalStyles = (element: Element, atRule: '@container' | '@media') =>
     );
 
 describe('PageHeader', () => {
-  it('renders the title as the page h1 in the h2 style by default', () => {
+  it('renders the title as the page h1 in the h3 style by default', () => {
     render(inTheme(<PageHeader title="MongoDB" />));
 
     const heading = screen.getByRole('heading', { level: 1, name: 'MongoDB' });
-    expect(heading).toHaveClass('MuiTypography-h2');
+    expect(heading).toHaveClass('MuiTypography-h3');
   });
 
   it('respects titleComponent and titleVariant', () => {
