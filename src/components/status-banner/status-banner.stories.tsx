@@ -1,5 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import * as DocBlock from '@storybook/addon-docs/blocks';
+import Box from '@mui/material/Box';
 import StateIndicator from '../state-indicator';
 import StatusBanner from './status-banner';
 
@@ -12,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          "A page's status in one line, under its header: one `StateIndicator` per facet, such as health, alerts and backups, with dashes between them. It wraps when the page is narrow.",
+          "A page's status in one line, under its header: one `StateIndicator` per facet, such as health, alerts and backups, with dashes between them. Narrower than 600px, by its own width rather than the viewport's, each facet takes a line and the dashes go.",
           '',
           'Keep it to the few facets a reader checks first, most important first, and always the same facets in the same order on a page, so a change of state is what catches the eye. Each child is one facet; wrap an indicator and its `actionable` link in a fragment to keep them together.',
           '',
@@ -73,6 +74,28 @@ export const Incomplete: Story = {
         </StateIndicator>
       </>
     </StatusBanner>
+  ),
+};
+
+export const Narrow: Story = {
+  render: () => (
+    <Box sx={{ width: 320 }}>
+      <StatusBanner aria-label="MongoDB status">
+        <StateIndicator state="degraded">5 of 14 clusters degraded</StateIndicator>
+        <>
+          <StateIndicator state="notSetUp">No alerts set up</StateIndicator>
+          <StateIndicator state="actionable" href="#">
+            Set up alerts
+          </StateIndicator>
+        </>
+        <>
+          <StateIndicator state="notSetUp">3 of 5 clusters protected</StateIndicator>
+          <StateIndicator state="actionable" href="#">
+            Set up backups
+          </StateIndicator>
+        </>
+      </StatusBanner>
+    </Box>
   ),
 };
 
