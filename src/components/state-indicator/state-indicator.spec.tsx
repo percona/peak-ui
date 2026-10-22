@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { createTheme, ThemeProvider, type PaletteMode } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
@@ -15,23 +15,28 @@ const glyphOf = (label: string) =>
   screen.getByText(label).closest('[data-state]')?.querySelector('svg') ?? null;
 
 describe('StateIndicator', () => {
-  it.each<[StateIndicatorState, string]>([
-    ['healthy', 'checkCircle'],
-    ['mixedProblems', 'dangerous'],
-    ['degraded', 'warning'],
-    ['loading', 'cached'],
-    ['errors', 'emergencyHome'],
-    ['notSetUp', 'help'],
-    ['information', 'chatInfo'],
-    ['silenced', 'notificationsOff'],
-  ])('shows %s with the %s glyph, hidden from assistive technology', (state, glyph) => {
-    renderInTheme(<StateIndicator state={state}>Label</StateIndicator>);
+  it.each<[StateIndicatorState, string, number]>([
+    ['healthy', 'checkCircle', 20],
+    ['mixedProblems', 'dangerous', 24],
+    ['degraded', 'warning', 24],
+    ['loading', 'cached', 20],
+    ['errors', 'emergencyHome', 24],
+    ['notSetUp', 'help', 20],
+    ['information', 'chatInfo', 20],
+    ['silenced', 'notificationsOff', 20],
+  ])(
+    'shows %s with the %s glyph at %ipx, hidden from assistive technology',
+    (state, glyph, size) => {
+      renderInTheme(<StateIndicator state={state}>Label</StateIndicator>);
 
-    const svg = glyphOf('Label');
+      const svg = glyphOf('Label');
 
-    expect(svg).toHaveAttribute('data-glyph', glyph);
-    expect(svg?.parentElement).toHaveAttribute('aria-hidden', 'true');
-  });
+      expect(svg).toHaveAttribute('data-glyph', glyph);
+      expect(svg).toHaveAttribute('viewBox', `0 0 ${size} ${size}`);
+      expect(svg).toHaveStyle({ width: `${size}px`, height: `${size}px` });
+      expect(svg?.parentElement).toHaveAttribute('aria-hidden', 'true');
+    }
+  );
 
   it('shows the default state as secondary text without an icon', () => {
     const theme = themeFor();
@@ -64,7 +69,7 @@ describe('StateIndicator', () => {
     expect(screen.getByText('Silenced')).toHaveStyle({ color: palette.text.secondary });
   });
 
-  it('fills only mixed problems, with the error surface and its contrast text', () => {
+  it('fills only mixed problems, with the error surface and its contrast text in bold', () => {
     const { palette } = themeFor('dark');
 
     renderInTheme(
@@ -80,43 +85,11 @@ describe('StateIndicator', () => {
     expect(filled.closest('[data-state]')).toHaveStyle({
       backgroundColor: palette.error.surface,
     });
-    expect(filled).toHaveStyle({ color: palette.error.contrastText });
+    expect(filled).toHaveStyle({ color: palette.error.contrastText, fontWeight: 700 });
+    expect(screen.getByText('32 alerts firing')).not.toHaveStyle({ fontWeight: 700 });
     expect(screen.getByText('32 alerts firing').closest('[data-state]')).not.toHaveStyle({
       backgroundColor: palette.error.surface,
     });
-  });
-
-  it('renders actionable as an underlined link without an icon', () => {
-    renderInTheme(
-      <StateIndicator state="actionable" href="/alerting/new">
-        Set up alerts
-      </StateIndicator>
-    );
-
-    const link = screen.getByRole('link', { name: 'Set up alerts' });
-
-    expect(link).toHaveAttribute('href', '/alerting/new');
-    expect(link).toHaveClass('MuiLink-underlineAlways');
-    expect(link.querySelector('svg')).toBeNull();
-  });
-
-  it('renders actionable through a router link component', () => {
-    const RouterLink = forwardRef<HTMLAnchorElement, { to: string; children?: ReactNode }>(
-      ({ to, ...props }, ref) => <a ref={ref} href={`/app${to}`} {...props} />
-    );
-
-    RouterLink.displayName = 'RouterLink';
-
-    renderInTheme(
-      <StateIndicator state="actionable" component={RouterLink} to="/backups/new">
-        Set up backups
-      </StateIndicator>
-    );
-
-    expect(screen.getByRole('link', { name: 'Set up backups' })).toHaveAttribute(
-      'href',
-      '/app/backups/new'
-    );
   });
 
   it('passes other props to the root', () => {

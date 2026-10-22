@@ -1,6 +1,2 @@
 export { default } from './state-indicator';
-export type {
-  StateIndicatorProps,
-  StateIndicatorState,
-  StateIndicatorTypeMap,
-} from './state-indicator.types';
+export type { StateIndicatorProps, StateIndicatorState } from './state-indicator.types';

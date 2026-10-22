@@ -1,15 +1,9 @@
 import { forwardRef } from 'react';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import type { OverridableComponent } from '@mui/material/OverridableComponent';
 import { keyframes } from '@mui/material/styles';
 import { mergeSx } from '@/utils';
 import { STATE_GLYPHS, type StateGlyph } from './state-indicator.glyphs';
-import type {
-  StateIndicatorProps,
-  StateIndicatorState,
-  StateIndicatorTypeMap,
-} from './state-indicator.types';
+import type { StateIndicatorProps, StateIndicatorState } from './state-indicator.types';
 
 interface Look {
   glyph?: StateGlyph;
@@ -21,7 +15,7 @@ interface Look {
   surface?: string;
 }
 
-const LOOKS: Record<Exclude<StateIndicatorState, 'actionable'>, Look> = {
+const LOOKS: Record<StateIndicatorState, Look> = {
   healthy: { glyph: 'checkCircle', icon: 'success.light', text: 'text.primary' },
   mixedProblems: {
     glyph: 'dangerous',
@@ -40,50 +34,26 @@ const LOOKS: Record<Exclude<StateIndicatorState, 'actionable'>, Look> = {
 
 const spin = keyframes`to { transform: rotate(360deg); }`;
 
-// 24px rows: a 22px body1 line plus 1px above and below, as in the Figma State indicator.
+// The icon's row: a 22px body1 line plus 1px above and below, as in the Figma State indicator.
 const ROW = 24;
 
 /** One fact with its state: an icon and a short label whose colors are fixed per state. */
-const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
-  ({ state, children, component, href, sx, ...rest }, ref) => {
-    if (state === 'actionable') {
-      return (
-        <Link
-          ref={ref as never}
-          component={component ?? 'a'}
-          // A router link builds its own href from `to`.
-          {...(href !== undefined && { href })}
-          underline="always"
-          variant="body1"
-          sx={mergeSx(
-            {
-              display: 'inline-block',
-              px: '2px',
-              py: '1px',
-              borderRadius: (theme) => `${theme.shape.borderRadiusXs}px`,
-            },
-            sx
-          )}
-          {...rest}
-        >
-          {children}
-        </Link>
-      );
-    }
-
+const StateIndicator = forwardRef<HTMLSpanElement, StateIndicatorProps>(
+  ({ state, children, sx, ...rest }, ref) => {
     const look = LOOKS[state];
+    const glyph = look.glyph && STATE_GLYPHS[look.glyph];
 
     return (
       <Box
         ref={ref}
-        component={component ?? 'span'}
+        component="span"
         data-state={state}
         sx={mergeSx(
           {
             display: 'inline-flex',
             alignItems: 'flex-start',
             gap: '2px',
-            px: '2px',
+            p: 0.5,
             borderRadius: (theme) => `${theme.shape.borderRadiusXs}px`,
             ...(look.surface && { bgcolor: look.surface }),
           },
@@ -91,7 +61,7 @@ const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
         )}
         {...rest}
       >
-        {look.glyph && (
+        {glyph && (
           <Box
             component="span"
             aria-hidden
@@ -105,13 +75,13 @@ const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
           >
             <Box
               component="svg"
-              viewBox="0 0 20 20"
+              viewBox={`0 0 ${glyph.size} ${glyph.size}`}
               focusable="false"
               data-glyph={look.glyph}
               sx={{
                 display: 'block',
-                width: 20,
-                height: 20,
+                width: glyph.size,
+                height: glyph.size,
                 fill: 'currentColor',
                 ...(state === 'loading' && {
                   '@media (prefers-reduced-motion: no-preference)': {
@@ -120,7 +90,7 @@ const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
                 }),
               }}
             >
-              <path d={STATE_GLYPHS[look.glyph]} />
+              <path d={glyph.d} />
             </Box>
           </Box>
         )}
@@ -129,9 +99,11 @@ const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
           sx={{
             typography: 'body1',
             color: look.text,
+            ...(state === 'mixedProblems' && { fontWeight: 'fontWeightBold' }),
             py: '1px',
-            px: look.glyph ? '4px' : 0,
+            px: glyph ? 0.5 : 0,
             minWidth: 0,
+            overflowWrap: 'break-word',
           }}
         >
           {children}
@@ -141,9 +113,6 @@ const StateIndicatorRoot = forwardRef<HTMLElement, StateIndicatorProps>(
   }
 );
 
-StateIndicatorRoot.displayName = 'StateIndicator';
-
-// Typed like MUI's own components, so `component={RouterLink} to="/x"` type-checks.
-const StateIndicator = StateIndicatorRoot as unknown as OverridableComponent<StateIndicatorTypeMap>;
+StateIndicator.displayName = 'StateIndicator';
 
 export default StateIndicator;
