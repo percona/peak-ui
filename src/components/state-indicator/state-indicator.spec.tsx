@@ -101,4 +101,25 @@ describe('StateIndicator', () => {
 
     expect(screen.getByTestId('health')).toHaveTextContent('All 14 clusters are healthy');
   });
+
+  it('draws a small indicator’s problem icon at 20px, the label still body1', () => {
+    const { typography } = themeFor();
+
+    renderInTheme(
+      <>
+        <StateIndicator state="degraded">Data paused</StateIndicator>
+        <StateIndicator state="degraded" size="small">
+          Data paused, last update 4m ago
+        </StateIndicator>
+      </>
+    );
+
+    const glyph = (text: string) =>
+      screen.getByText(text).closest('[data-state]')?.querySelector('[data-glyph]');
+    expect(glyph('Data paused')).toHaveStyle({ width: '24px' });
+    expect(glyph('Data paused, last update 4m ago')).toHaveStyle({ width: '20px' });
+    expect(screen.getByText('Data paused, last update 4m ago')).toHaveStyle({
+      fontSize: typography.body1.fontSize,
+    });
+  });
 });

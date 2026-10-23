@@ -88,3 +88,21 @@ export const States: Story = {
     </Box>
   ),
 };
+
+export const Small: Story = {
+  name: 'Small',
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'Every icon at 20px, the problem ones too, for a dense row such as a page header’s toolbar.',
+      },
+    },
+  },
+  render: () => (
+    <StateIndicator state="degraded" size="small">
+      Data paused, last update 4m ago
+    </StateIndicator>
+  ),
+};
