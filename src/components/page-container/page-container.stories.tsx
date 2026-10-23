@@ -1,6 +1,8 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import PageHeader from '../page-header';
 import PageContainer from './page-container';
 
 const Filler = ({ label }: { label: string }) => (
@@ -59,5 +61,21 @@ export const FullWidth: Story = {
   args: {
     maxWidth: 'full',
     children: <Filler label="maxWidth = 'full' (edge to edge with side padding)" />,
+  },
+};
+
+export const WithPageHeader: Story = {
+  args: {
+    maxWidth: 'full',
+    children: (
+      <>
+        <PageHeader
+          title="Help center"
+          description="Guides, community and support for Percona Monitoring and Management."
+          actions={<Button variant="outlined">Contact support</Button>}
+        />
+        <Filler label="PageHeader as the first child, then the page content." />
+      </>
+    ),
   },
 };
