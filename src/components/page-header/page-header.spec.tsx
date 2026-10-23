@@ -1,5 +1,5 @@
 import { createRef, type ReactNode } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import Button from '@mui/material/Button';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { describe, expect, it, vi } from 'vitest';
@@ -187,7 +187,7 @@ describe('PageHeader', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('puts an inline toolbar on the title row, before the actions, once the header is md wide', () => {
+  it('puts an inline toolbar on the title row, before the actions, while it fits there on one line', () => {
     const { container } = render(
       inTheme(
         <PageHeader
@@ -201,28 +201,77 @@ describe('PageHeader', () => {
     );
 
     const grid = container.firstElementChild?.firstElementChild as HTMLElement;
-    const rules = conditionalStyles(grid, '@container');
-    const at = (breakpoint: 'sm' | 'md') =>
-      rules.find(({ query }) => query === theme.containerQueries.up(breakpoint))?.style;
-    const wideGrid = { style: at('md') as CSSStyleDeclaration };
 
-    // Below md the actions stay beside the title and the toolbar takes the next row.
     expect(getComputedStyle(grid).gridTemplateAreas).toBe(
-      '"title actions" "description description" "toolbar toolbar"'
-    );
-    expect(wideGrid.style.getPropertyValue('grid-template-areas')).toBe(
       '"title toolbar actions" "description description description"'
     );
-    expect(wideGrid.style.getPropertyValue('grid-template-columns')).toBe(
-      'auto minmax(0, 1fr) auto'
-    );
-    expect(wideGrid.style.getPropertyValue('align-items')).toBe('center');
+    expect(getComputedStyle(grid).gridTemplateColumns).toBe('auto minmax(0, 1fr) auto');
+    expect(getComputedStyle(grid).alignItems).toBe('center');
 
     const refresh = screen.getByRole('button', { name: 'Refresh' });
     const add = screen.getByRole('button', { name: 'Add MongoDB' });
     expect(refresh.compareDocumentPosition(add) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  it('moves an inline toolbar below the title as one block once it no longer fits beside it, and back when it does', () => {
+    // One-line widths of the title, the toolbar and the actions: 200 + 500 + 120 plus two 24px gaps is 868px.
+    const widths: Record<string, number> = { title: 200, toolbar: 500, actions: 120 };
+    let available = 800;
+    let resized = () => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized = callback;
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        return { width: widths[this.dataset.pageHeaderPart ?? ''] ?? 0 } as DOMRect;
+      });
+    const clientWidth = vi
+      .spyOn(HTMLElement.prototype, 'clientWidth', 'get')
+      .mockImplementation(function (this: HTMLElement) {
+        return this.querySelector(':scope > [data-page-header-part]') ? available : 0;
+      });
+
+    try {
+      const { container } = render(
+        inTheme(
+          <PageHeader
+            title="MongoDB"
+            actions={<Button>Add MongoDB</Button>}
+            toolbar={<Button>Refresh</Button>}
+            toolbarPlacement="inline"
+          />
+        )
+      );
+      const grid = container.firstElementChild?.firstElementChild as HTMLElement;
+
+      expect(getComputedStyle(grid).gridTemplateAreas).toBe('"title actions" "toolbar toolbar"');
+      // Beside the title, the actions sit on a box one title line tall, so they centre on its first line.
+      const actions = screen.getByRole('button', { name: 'Add MongoDB' }).parentElement
+        ?.parentElement as HTMLElement;
+      expect(getComputedStyle(actions).alignSelf).toBe('start');
+      expect(getComputedStyle(actions).fontSize).toBe(
+        getComputedStyle(screen.getByRole('heading')).fontSize
+      );
+
+      available = 900;
+      act(() => resized());
+
+      expect(getComputedStyle(grid).gridTemplateAreas).toBe('"title toolbar actions"');
+    } finally {
+      rect.mockRestore();
+      clientWidth.mockRestore();
+      vi.unstubAllGlobals();
+    }
   });
 
   it('keeps the toolbar below without the inline placement, and without a toolbar ignores it', () => {

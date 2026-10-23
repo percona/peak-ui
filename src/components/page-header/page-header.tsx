@@ -1,12 +1,84 @@
-import { forwardRef } from 'react';
+import { forwardRef, type RefObject, useLayoutEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography, { type TypographyProps } from '@mui/material/Typography';
-import type { Theme } from '@mui/material/styles';
+import { type Theme, useTheme } from '@mui/material/styles';
 import type { PageHeaderProps } from './page-header.types';
+
+const PART = 'data-page-header-part';
+
+// What an element takes on one line: a hidden copy laid out at its max-content width, so the measure never depends on the current layout.
+const oneLineWidth = (host: HTMLElement, element: Element | null) => {
+  if (!element) {
+    return 0;
+  }
+  const copy = element.cloneNode(true) as HTMLElement;
+
+  Object.assign(copy.style, {
+    position: 'absolute',
+    visibility: 'hidden',
+    pointerEvents: 'none',
+    width: 'max-content',
+    flexWrap: 'nowrap',
+  });
+  host.appendChild(copy);
+  const { width } = copy.getBoundingClientRect();
+  copy.remove();
+
+  return width;
+};
+
+/** Whether the title, an inline toolbar on one line and the actions fit side by side; it rechecks as the header resizes or the toolbar's content changes. */
+const useToolbarFitsBesideTitle = (
+  grid: RefObject<HTMLDivElement | null>,
+  enabled: boolean,
+  gap: number
+) => {
+  const [fits, setFits] = useState(true);
+
+  useLayoutEffect(() => {
+    const host = grid.current;
+
+    if (!enabled || !host || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const part = (name: string) => host.querySelector(`:scope > [${PART}="${name}"]`);
+    const measure = () => {
+      // Not laid out, as in a hidden tab's first render: keep the last answer.
+      if (!host.clientWidth) {
+        return;
+      }
+      const parts = ['title', 'toolbar', 'actions'].map(part).filter(Boolean);
+      const needed =
+        parts.reduce((sum, element) => sum + oneLineWidth(host, element), 0) +
+        gap * (parts.length - 1);
+
+      setFits(needed <= host.clientWidth);
+    };
+
+    measure();
+    const resize = new ResizeObserver(measure);
+    resize.observe(host);
+    const content = new MutationObserver(measure);
+    const toolbar = part('toolbar');
+    if (toolbar) {
+      content.observe(toolbar, { childList: true, subtree: true, characterData: true });
+    }
+
+    return () => {
+      resize.disconnect();
+      content.disconnect();
+    };
+  }, [grid, enabled, gap]);
+
+  return fits;
+};
+
+const titleType = (theme: Theme, variant: TypographyProps['variant']) =>
+  variant && variant !== 'inherit' ? theme.typography[variant] : undefined;
 
 // A zero-width space in the title's type, the strut MUI Select uses, makes a row one title line tall.
 const titleLineStrut = (theme: Theme, variant: TypographyProps['variant']) => ({
-  ...(variant && variant !== 'inherit' ? theme.typography[variant] : undefined),
+  ...titleType(theme, variant),
   content: '"\\200B"',
 });
 
@@ -32,7 +104,16 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
     },
     ref
   ) => {
+    const theme = useTheme();
+    const gridRef = useRef<HTMLDivElement>(null);
     const inline = toolbarPlacement === 'inline' && !!toolbar;
+    // An inline toolbar moves below the title, as one block, once its items no longer fit beside it on one line; only then may they wrap.
+    const fitsBesideTitle = useToolbarFitsBesideTitle(
+      gridRef,
+      inline,
+      parseFloat(theme.spacing(3))
+    );
+    const inlineRow = inline && fitsBesideTitle;
     const wideColumns = [
       inline ? 'auto' : 'minmax(0, 1fr)',
       inline && 'minmax(0, 1fr)',
@@ -60,6 +141,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
     ];
     const toolbarRow = toolbar && (
       <Box
+        {...{ [PART]: 'toolbar' }}
         sx={{
           gridArea: 'toolbar',
           display: 'flex',
@@ -67,7 +149,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
           alignItems: 'center',
           // Wrapped onto its own line, a toolbar item sits close under the one before it.
           columnGap: inline ? 3 : 1,
-          rowGap: 0.25,
+          rowGap: 0.5,
           minWidth: 0,
           mt: inline ? 0 : 1,
         }}
@@ -96,23 +178,32 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
         {...rest}
       >
         <Box
+          ref={gridRef}
           sx={(theme) => ({
             display: 'grid',
-            // Below md an inline toolbar takes its own row, and the actions keep their place beside the title.
+            // An inline toolbar that does not fit beside the title takes its own row, and the actions keep their place beside the title.
             gridTemplateColumns: twoRows ? 'minmax(0, 1fr) auto' : 'minmax(0, 1fr)',
             gridTemplateAreas: (twoRows ? mediumAreas : narrowAreas).filter(Boolean).join(' '),
             // Beside the actions on a narrow header the title gets the room a 24px gap would take.
             columnGap: inline && !twoRows ? 3 : 2,
             rowGap: 2,
-            [wide(theme)]: {
+            // An inline toolbar sits beside the title whenever it fits there on one line, at any width; otherwise the two-row layout holds.
+            ...(inlineRow && {
               gridTemplateColumns: wideColumns.join(' '),
               gridTemplateAreas: wideAreas.filter(Boolean).join(' '),
-              ...(inline && { columnGap: 3 }),
-              ...(inline && { alignItems: 'center' }),
-            },
+              columnGap: 3,
+              alignItems: 'center',
+            }),
+            ...(!inline && {
+              [wide(theme)]: {
+                gridTemplateColumns: wideColumns.join(' '),
+                gridTemplateAreas: wideAreas.filter(Boolean).join(' '),
+              },
+            }),
           })}
         >
           <Box
+            {...{ [PART]: 'title' }}
             sx={{
               gridArea: 'title',
               display: 'flex',
@@ -154,15 +245,19 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
           {inline && toolbarRow}
           {actions && (
             <Box
+              {...{ [PART]: 'actions' }}
               sx={(theme) => ({
                 gridArea: 'actions',
                 display: 'flex',
                 alignItems: 'center',
-                alignSelf: twoRows ? 'center' : 'start',
+                alignSelf: 'start',
+                // Beside the title, a box one title line tall centres the actions on its first line; taller buttons stand out of it evenly.
+                ...(twoRows && { ...titleType(theme, titleVariant), height: '1lh' }),
                 // Inline, the row centres everything, so the actions need no title-line strut.
-                [wide(theme)]: inline
-                  ? { alignSelf: 'center' }
-                  : { '&::before': titleLineStrut(theme, titleVariant) },
+                ...(inlineRow && { alignSelf: 'center', height: 'auto' }),
+                ...(!inline && {
+                  [wide(theme)]: { '&::before': titleLineStrut(theme, titleVariant) },
+                }),
               })}
             >
               <Box
