@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { StateIndicatorState } from '../state-indicator';
 
 export interface StatusCardProps extends Omit<CardProps, 'children' | 'variant' | 'raised'> {
-  /** The fact's state, as on `StateIndicator`; `mixedProblems` also edges the card in the error color. */
+  /** The fact's state, as on `StateIndicator`. */
   state: StateIndicatorState;
   /** What holds, in a few words: the indicator's label. */
   children: ReactNode;

@@ -19,7 +19,7 @@ const meta = {
           '',
           'The whole card takes the action. It tints on hover like a list row, and a click anywhere on it clicks the action, while the action stays a button of its own, with its own hover and focus, and the only stop for the keyboard and for screen readers.',
           '',
-          'Make the action a small text `Button` with an end arrow: `ArrowDownward` when it leads further down the page, `ArrowForward` when it opens another page. `mixedProblems` edges the card in the error color, so the facet that needs attention first stands out.',
+          'Make the action a small text `Button` with an end arrow: `ArrowDownward` when it leads further down the page, `ArrowForward` when it opens another page.',
         ].join('\n'),
       },
       page: () => (

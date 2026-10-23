@@ -9,14 +9,13 @@ import type { StatusCardProps } from './status-card.types';
 const CONTROLS = 'a, button, input, select, textarea, summary, [role="button"], [role="link"]';
 // What a click on the card's surface stands for: its action.
 const ACTION = 'a[href], button:not(:disabled)';
-// Figma draws the card's border inside it, so the padding gives up what the border takes.
-const INSET = 8;
+// Figma's 8px inset draws the card's 1px border inside it, so the padding is 7px.
+const INSET = 7;
 
 /** A StateIndicator with the action that changes it, on an outlined card whose whole surface takes the action. */
 const StatusCard = forwardRef<HTMLDivElement, StatusCardProps>(
   ({ state, children, action, onClick, sx, ...rest }, ref) => {
     const actions = useRef<HTMLDivElement>(null);
-    const border = state === 'mixedProblems' ? 2 : 1;
 
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
       onClick?.(event);
@@ -45,9 +44,7 @@ const StatusCard = forwardRef<HTMLDivElement, StatusCardProps>(
             flexDirection: 'column',
             alignItems: 'flex-start',
             gap: 0.5,
-            p: `${INSET - border}px`,
-            borderWidth: border,
-            ...(state === 'mixedProblems' && { borderColor: theme.palette.error.light }),
+            p: `${INSET}px`,
             cursor: 'pointer',
             // A tint over the card's own surface, like a hovered list row.
             '@media (hover: hover)': {

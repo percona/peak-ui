@@ -95,9 +95,7 @@ describe('StatusCard', () => {
     expect(onLinkClick).toHaveBeenCalledTimes(1);
   });
 
-  it('is outlined, with an error edge only for mixed problems', () => {
-    const { palette } = themeFor('dark');
-
+  it('keeps the outlined card border in every state', () => {
     renderInTheme(
       <>
         <StatusCard state="mixedProblems" data-testid="health" action={<Button>Review</Button>}>
@@ -110,12 +108,13 @@ describe('StatusCard', () => {
       'dark'
     );
 
-    expect(screen.getByTestId('health')).toHaveClass('MuiPaper-outlined');
-    expect(screen.getByTestId('health')).toHaveStyle({
-      borderWidth: '2px',
-      borderColor: palette.error.light,
-      padding: '6px',
-    });
-    expect(screen.getByTestId('alerts')).toHaveStyle({ borderWidth: '1px', padding: '7px' });
+    for (const id of ['health', 'alerts']) {
+      const card = screen.getByTestId(id);
+      expect(card).toHaveClass('MuiPaper-outlined');
+      expect(card).toHaveStyle({ borderWidth: '1px', padding: '7px' });
+    }
+    expect(getComputedStyle(screen.getByTestId('health')).borderColor).toBe(
+      getComputedStyle(screen.getByTestId('alerts')).borderColor
+    );
   });
 });
