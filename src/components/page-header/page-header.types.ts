@@ -21,12 +21,12 @@ export interface PageHeaderProps extends Omit<BoxProps, 'title' | 'children'> {
   badge?: ReactNode;
   /** One line under the title: a subtitle or a status summary; may contain links. */
   description?: ReactNode;
-  /** Page-level actions; right of the title, in at most half the row, once the header itself is md (900px) wide; under the description when it is narrower. */
+  /** Page-level actions; right of the title, in at most half the row, once the header itself is md (900px) wide; under the description when it is narrower. With an inline toolbar they stay beside the title at any width. */
   actions?: ReactNode;
   /** Page-wide filters, freshness and view switches: a row under the title, or on the title's row with `toolbarPlacement="inline"`. */
   toolbar?: ReactNode;
   /**
-   * `inline` puts the toolbar on the title's row, between the title and the actions, once the header is md wide; narrower, it stacks under the title.
+   * `inline` puts the toolbar on the title's row, between the title and the actions, whenever the title, the toolbar on one line and the actions fit side by side, at any width. Otherwise the whole toolbar moves under the title as one block, and only there do its items wrap.
    * @default 'below'
    */
   toolbarPlacement?: 'below' | 'inline';
