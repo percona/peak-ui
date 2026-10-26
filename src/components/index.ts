@@ -102,6 +102,9 @@ export { default as PageContainer } from './page-container';
 export * from './state-indicator';
 export { default as StateIndicator } from './state-indicator';
 
+export * from './severity-icon';
+export { default as SeverityIcon } from './severity-icon';
+
 export * from './status-banner';
 export { default as StatusBanner } from './status-banner';
 
