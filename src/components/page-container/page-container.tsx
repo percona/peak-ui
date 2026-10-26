@@ -35,7 +35,6 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(
               md: isFull ? 4 : undefined,
             },
             mx: 'auto',
-            mt: 1,
           },
           // `sx` can be an object, array, or function — normalize to an array so
           // all SxProps shapes compose and consumer styles still win.
