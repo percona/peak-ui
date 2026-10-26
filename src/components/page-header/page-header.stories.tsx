@@ -10,6 +10,8 @@ import Typography from '@mui/material/Typography';
 import AddOutlined from '@mui/icons-material/AddOutlined';
 import MoreVertOutlined from '@mui/icons-material/MoreVertOutlined';
 import RefreshRounded from '@mui/icons-material/RefreshRounded';
+import ShareOutlined from '@mui/icons-material/ShareOutlined';
+import StarBorderOutlined from '@mui/icons-material/StarBorderOutlined';
 import Chip from '../chip';
 import { PerconaMoIcon } from '../icons';
 import PageContainer from '../page-container';
@@ -86,7 +88,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar for page-wide filters, in its own row or, with `toolbarPlacement=\"inline\"`, on the title's row. `divider` draws a rule under it. Use it as the first child of `PageContainer`. Once the header itself is `md` (900px) wide, the actions sit right of the title, centred on its first line, and take at most half the row; narrower, they move under the description. With an inline toolbar the content decides instead of a width: the toolbar stays on the title's row while everything fits there on one line, otherwise it moves under the title as one block, and the actions stay beside the title. The header's own width decides, not the viewport's, so a docked sidebar beside the page counts. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.",
+          "The top of a page: its single `h1` with an optional decorative mark and badge, a one-line description, actions, and an optional toolbar for page-wide filters, in its own row or, with `toolbarPlacement=\"inline\"`, on the title's row. `divider` draws a rule under it. Use it as the first child of `PageContainer`. The actions sit right of the title, centred on its first line, whenever they fit there with it on one line, and from `md` (900px) of the header's own width regardless, taking at most half the row; otherwise they move under the description. With an inline toolbar the content decides instead of a width: the toolbar stays on the title's row while everything fits there on one line, otherwise it moves under the title as one block, and the actions stay beside the title. The header's own width decides, not the viewport's, so a docked sidebar beside the page counts. Slots you leave out render nothing. Switch the color mode from the Storybook toolbar to check dark mode.",
       },
     },
   },
@@ -249,4 +251,39 @@ export const InsidePageContainer: Story = {
     </PageContainer>
   ),
   args: WithToolbar.args,
+};
+
+export const IconActions: Story = {
+  name: 'Icon actions beside the title',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'An app header: icon actions are small enough to stay beside the title on a narrow header, so they do.',
+      },
+    },
+  },
+  render: (args) => (
+    <Box sx={{ width: 480 }}>
+      <PageHeader {...args} />
+    </Box>
+  ),
+  args: {
+    title: 'Operations for MongoDB',
+    divider: true,
+    actions: (
+      <Box sx={{ display: 'flex' }}>
+        <Tooltip title="Add to Starred">
+          <IconButton aria-label="Add to Starred">
+            <StarBorderOutlined />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Copy link">
+          <IconButton aria-label="Copy link">
+            <ShareOutlined />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+  },
 };

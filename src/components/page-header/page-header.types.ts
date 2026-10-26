@@ -21,7 +21,7 @@ export interface PageHeaderProps extends Omit<BoxProps, 'title' | 'children'> {
   badge?: ReactNode;
   /** One line under the title: a subtitle or a status summary; may contain links. */
   description?: ReactNode;
-  /** Page-level actions; right of the title, in at most half the row, once the header itself is md (900px) wide; under the description when it is narrower. With an inline toolbar they stay beside the title at any width. */
+  /** Page-level actions; right of the title whenever they fit there with it on one line, and from md (900px) of the header's own width regardless, in at most half the row; under the description otherwise. With an inline toolbar they stay beside the title at any width. */
   actions?: ReactNode;
   /** Page-wide filters, freshness and view switches: a row under the title, or on the title's row with `toolbarPlacement="inline"`. */
   toolbar?: ReactNode;

@@ -274,6 +274,54 @@ describe('PageHeader', () => {
     }
   });
 
+  it('keeps actions beside the title at any width while they fit there on one line, and stacks them when they no longer do', () => {
+    // One-line widths of the title and the actions: 300 + 80 plus a 16px gap is 396px.
+    const widths: Record<string, number> = { title: 300, actions: 80 };
+    let available = 380;
+    let resized = () => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized = callback;
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        return { width: widths[this.dataset.pageHeaderPart ?? ''] ?? 0 } as DOMRect;
+      });
+    const clientWidth = vi
+      .spyOn(HTMLElement.prototype, 'clientWidth', 'get')
+      .mockImplementation(function (this: HTMLElement) {
+        return this.querySelector(':scope > [data-page-header-part]') ? available : 0;
+      });
+
+    try {
+      const { container } = render(
+        inTheme(<PageHeader title="Operations for MongoDB" actions={<Button>Copy link</Button>} />)
+      );
+      const grid = container.firstElementChild?.firstElementChild as HTMLElement;
+
+      expect(getComputedStyle(grid).gridTemplateAreas).toBe('"title" "actions"');
+
+      available = 400;
+      act(() => resized());
+
+      expect(getComputedStyle(grid).gridTemplateAreas).toBe('"title actions"');
+      const actions = screen.getByRole('button', { name: 'Copy link' })
+        .parentElement as HTMLElement;
+      expect(getComputedStyle(actions).justifyContent).toBe('flex-end');
+    } finally {
+      rect.mockRestore();
+      clientWidth.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('keeps the toolbar below without the inline placement, and without a toolbar ignores it', () => {
     const { container } = render(inTheme(<PageHeader title="MongoDB" toolbarPlacement="inline" />));
 

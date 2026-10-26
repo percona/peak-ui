@@ -27,30 +27,35 @@ const oneLineWidth = (host: HTMLElement, element: Element | null) => {
   return width;
 };
 
-/** Whether the title, an inline toolbar on one line and the actions fit side by side; it rechecks as the header resizes or the toolbar's content changes. */
-const useToolbarFitsBesideTitle = (
+/** Whether the named parts fit side by side on one line; it rechecks as the header resizes or their content changes. */
+const useFitsOnOneLine = (
   grid: RefObject<HTMLDivElement | null>,
-  enabled: boolean,
-  gap: number
+  parts: string,
+  gap: number,
+  initial: boolean
 ) => {
-  const [fits, setFits] = useState(true);
+  const [fits, setFits] = useState(initial);
 
   useLayoutEffect(() => {
     const host = grid.current;
+    const names = parts.split(' ').filter(Boolean);
 
-    if (!enabled || !host || typeof ResizeObserver === 'undefined') {
+    if (!names.length || !host || typeof ResizeObserver === 'undefined') {
       return;
     }
-    const part = (name: string) => host.querySelector(`:scope > [${PART}="${name}"]`);
+    const elements = () =>
+      names
+        .map((name) => host.querySelector(`:scope > [${PART}="${name}"]`))
+        .filter((element): element is Element => element !== null);
     const measure = () => {
       // Not laid out, as in a hidden tab's first render: keep the last answer.
       if (!host.clientWidth) {
         return;
       }
-      const parts = ['title', 'toolbar', 'actions'].map(part).filter(Boolean);
+      const measured = elements();
       const needed =
-        parts.reduce((sum, element) => sum + oneLineWidth(host, element), 0) +
-        gap * (parts.length - 1);
+        measured.reduce((sum, element) => sum + oneLineWidth(host, element), 0) +
+        gap * (measured.length - 1);
 
       setFits(needed <= host.clientWidth);
     };
@@ -59,16 +64,15 @@ const useToolbarFitsBesideTitle = (
     const resize = new ResizeObserver(measure);
     resize.observe(host);
     const content = new MutationObserver(measure);
-    const toolbar = part('toolbar');
-    if (toolbar) {
-      content.observe(toolbar, { childList: true, subtree: true, characterData: true });
-    }
+    elements().forEach((element) =>
+      content.observe(element, { childList: true, subtree: true, characterData: true })
+    );
 
     return () => {
       resize.disconnect();
       content.disconnect();
     };
-  }, [grid, enabled, gap]);
+  }, [grid, parts, gap]);
 
   return fits;
 };
@@ -107,13 +111,15 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
     const theme = useTheme();
     const gridRef = useRef<HTMLDivElement>(null);
     const inline = toolbarPlacement === 'inline' && !!toolbar;
-    // An inline toolbar moves below the title, as one block, once its items no longer fit beside it on one line; only then may they wrap.
-    const fitsBesideTitle = useToolbarFitsBesideTitle(
+    // Measured on one line: an inline toolbar moves below the title, as one block, once it no longer fits there (only then may its items wrap); actions alone stay beside the title whenever they fit.
+    const fitsOnOneLine = useFitsOnOneLine(
       gridRef,
-      inline,
-      parseFloat(theme.spacing(3))
+      inline ? 'title toolbar actions' : actions ? 'title actions' : '',
+      parseFloat(theme.spacing(inline ? 3 : 2)),
+      inline
     );
-    const inlineRow = inline && fitsBesideTitle;
+    const inlineRow = inline && fitsOnOneLine;
+    const actionsBeside = !inline && !!actions && fitsOnOneLine;
     const wideColumns = [
       inline ? 'auto' : 'minmax(0, 1fr)',
       inline && 'minmax(0, 1fr)',
@@ -194,6 +200,12 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
               columnGap: 3,
               alignItems: 'center',
             }),
+            // Without an inline toolbar the actions sit beside the title while they fit there on one line, and always from md, where the title wraps in its half.
+            ...(actionsBeside && {
+              gridTemplateColumns: wideColumns.join(' '),
+              gridTemplateAreas: wideAreas.filter(Boolean).join(' '),
+              alignItems: 'center',
+            }),
             ...(!inline && {
               [wide(theme)]: {
                 gridTemplateColumns: wideColumns.join(' '),
@@ -251,13 +263,14 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
                 display: 'flex',
                 alignItems: 'center',
                 alignSelf: 'start',
-                // Beside the title, a box one title line tall centres the actions on its first line; taller buttons stand out of it evenly.
+                // Beside a title that may wrap, a box one title line tall centres the actions on its first line; taller buttons stand out of it evenly.
                 ...(twoRows && { ...titleType(theme, titleVariant), height: '1lh' }),
-                // Inline, the row centres everything, so the actions need no title-line strut.
-                ...(inlineRow && { alignSelf: 'center', height: 'auto' }),
-                ...(!inline && {
-                  [wide(theme)]: { '&::before': titleLineStrut(theme, titleVariant) },
-                }),
+                ...(!inline &&
+                  !actionsBeside && {
+                    [wide(theme)]: { ...titleType(theme, titleVariant), height: '1lh' },
+                  }),
+                // On one line with the title, the row centres everything, so the actions need no title-line box.
+                ...((inlineRow || actionsBeside) && { alignSelf: 'center', height: 'auto' }),
               })}
             >
               <Box
@@ -265,7 +278,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
                   display: 'flex',
                   flexWrap: 'wrap',
                   alignItems: 'center',
-                  justifyContent: twoRows ? 'flex-end' : 'flex-start',
+                  justifyContent: twoRows || actionsBeside ? 'flex-end' : 'flex-start',
                   gap: 1,
                   [wide(theme)]: { justifyContent: 'flex-end' },
                 })}
