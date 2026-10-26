@@ -91,7 +91,7 @@ const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
     {
       title,
       titleComponent = 'h1',
-      titleVariant = 'h3',
+      titleVariant = 'h4',
       icon,
       badge,
       description,

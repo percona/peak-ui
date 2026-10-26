@@ -11,8 +11,8 @@ export interface PageHeaderProps extends Omit<BoxProps, 'title' | 'children'> {
    */
   titleComponent?: ElementType;
   /**
-   * Visual size of the title, any typography variant; h3 (33px) suits a page, h2 reads too large beside a sidebar.
-   * @default 'h3'
+   * Visual size of the title, any typography variant; h4 (28px) suits a page beside a sidebar, h3 and larger read too loud there.
+   * @default 'h4'
    */
   titleVariant?: TypographyProps['variant'];
   /** A product or technology mark before the title; decorative (aria-hidden). */
