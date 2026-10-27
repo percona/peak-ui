@@ -8,6 +8,8 @@ const SEVERITIES: Array<[SeverityIconSeverity, string]> = [
   ['critical', 'Critical'],
   ['error', 'Error'],
   ['warning', 'Warning'],
+  ['notSetUp', 'Not set up'],
+  ['info', 'Info'],
 ];
 
 const meta = {
@@ -19,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          'How bad a problem is, as the State indicator draws it: `critical` is the red octagon, `error` the red diamond, `warning` the yellow triangle. Use it to mark each problem in a list, such as a hub’s Needs attention rows, so the list reads like the status banner above it.',
+          'A severity as the State indicator draws it: `critical` is the red octagon, `error` the red diamond, `warning` the yellow triangle, `notSetUp` the circled question mark and `info` the speech bubble. Use it to mark each item in a list, such as a hub’s Needs attention and Recommendations rows, so the list reads like the status banner above it.',
           '',
           'The glyph and color are fixed per severity. The icon is decorative by default: say the severity in text nearby, or pass `titleAccess` to name it.',
         ].join('\n'),

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { describe, expect, it } from 'vitest';
 import { getThemeOptions } from '../../design';
-import SeverityIcon from './severity-icon';
+import SeverityIcon, { severityTextColor } from './severity-icon';
 import type { SeverityIconSeverity } from './severity-icon.types';
 
 const renderInTheme = (node: ReactNode) =>
@@ -16,6 +16,8 @@ describe('SeverityIcon', () => {
     ['critical', 'M8.25 21L3 15.75'],
     ['error', 'M11.2375 21.875'],
     ['warning', 'M1 21L12 2'],
+    ['notSetUp', 'M9.95833 15C10.25'],
+    ['info', 'M10 5.83333C10.2361'],
   ])(
     'draws %s with the State indicator’s glyph, hidden from assistive technology',
     (severity, path) => {
@@ -28,16 +30,18 @@ describe('SeverityIcon', () => {
     }
   );
 
-  it('is 24px by default and 20px when small', () => {
+  it('draws every glyph at 24px, as the State indicator does, and at 20px when small', () => {
     const { container } = renderInTheme(
       <>
         <SeverityIcon severity="error" />
-        <SeverityIcon severity="error" size="small" />
+        <SeverityIcon severity="info" />
+        <SeverityIcon severity="info" size="small" />
       </>
     );
-    const [medium, small] = container.querySelectorAll('svg');
+    const [problem, info, small] = container.querySelectorAll('svg');
 
-    expect(medium).toHaveStyle({ width: '24px', height: '24px' });
+    expect(problem).toHaveStyle({ width: '24px', height: '24px' });
+    expect(info).toHaveStyle({ width: '24px', height: '24px' });
     expect(small).toHaveStyle({ width: '20px', height: '20px' });
   });
 
@@ -45,5 +49,23 @@ describe('SeverityIcon', () => {
     renderInTheme(<SeverityIcon severity="critical" titleAccess="Critical" />);
 
     expect(screen.getByRole('img', { name: 'Critical' })).toBeInTheDocument();
+  });
+});
+
+describe('severityTextColor', () => {
+  it('colors text as its icon in dark mode', () => {
+    expect(
+      (['critical', 'error', 'warning', 'notSetUp', 'info'] as const).map((severity) =>
+        severityTextColor(severity, 'dark')
+      )
+    ).toEqual(['error.light', 'error.light', 'warning.light', 'text.primary', 'text.primary']);
+  });
+
+  it('takes a step that reads on white in light mode', () => {
+    expect(
+      (['critical', 'error', 'warning', 'notSetUp', 'info'] as const).map((severity) =>
+        severityTextColor(severity, 'light')
+      )
+    ).toEqual(['error.main', 'error.main', 'warning.dark', 'text.primary', 'text.primary']);
   });
 });
