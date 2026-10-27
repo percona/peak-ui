@@ -1,5 +1,5 @@
 // Material Symbols, filled where Figma uses the fill style, exported from the Figma State indicator.
-// The problem glyphs are drawn at 24px and the rest at 20px, as there.
+// `size` is each glyph's own grid, its viewBox: 24 for the problem glyphs, 20 for the rest; every one is drawn at 24px.
 export const STATE_GLYPHS = {
   checkCircle: {
     size: 20,

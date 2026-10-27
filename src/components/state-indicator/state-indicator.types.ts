@@ -29,6 +29,6 @@ export interface StateIndicatorProps extends Omit<BoxProps<'span'>, 'children'> 
   state: StateIndicatorState;
   /** What holds, in a few words, such as "All 14 clusters are healthy". */
   children: ReactNode;
-  /** `small` draws every icon at 20px, the problem ones too, for a dense row such as a page header's toolbar. Defaults to `medium`, with 24px problem icons. */
+  /** `small` draws every icon at 20px, for a dense row such as a page header's toolbar. Defaults to `medium`, with every icon at 24px. */
   size?: 'medium' | 'small';
 }

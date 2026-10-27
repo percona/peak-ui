@@ -25,7 +25,7 @@ describe('StateIndicator', () => {
     ['information', 'chatInfo', 20],
     ['silenced', 'notificationsOff', 20],
   ])(
-    'shows %s with the %s glyph at %ipx, hidden from assistive technology',
+    'shows %s with the %s glyph from its %ipx grid at 24px, hidden from assistive technology',
     (state, glyph, size) => {
       renderInTheme(<StateIndicator state={state}>Label</StateIndicator>);
 
@@ -33,7 +33,7 @@ describe('StateIndicator', () => {
 
       expect(svg).toHaveAttribute('data-glyph', glyph);
       expect(svg).toHaveAttribute('viewBox', `0 0 ${size} ${size}`);
-      expect(svg).toHaveStyle({ width: `${size}px`, height: `${size}px` });
+      expect(svg).toHaveStyle({ width: '24px', height: '24px' });
       expect(svg?.parentElement).toHaveAttribute('aria-hidden', 'true');
     }
   );

@@ -36,7 +36,8 @@ const spin = keyframes`to { transform: rotate(360deg); }`;
 
 // The icon's row: a 22px body1 line plus 1px above and below, as in the Figma State indicator.
 const ROW = 24;
-// A small indicator draws every glyph at 20px, the problem ones too.
+// Every glyph at 24px, so the states read as one set; a small indicator draws them all at 20px.
+const GLYPH = 24;
 const SMALL_GLYPH = 20;
 
 /** One fact with its state: an icon and a short label whose colors are fixed per state. */
@@ -82,8 +83,8 @@ const StateIndicator = forwardRef<HTMLSpanElement, StateIndicatorProps>(
               data-glyph={look.glyph}
               sx={{
                 display: 'block',
-                width: size === 'small' ? SMALL_GLYPH : glyph.size,
-                height: size === 'small' ? SMALL_GLYPH : glyph.size,
+                width: size === 'small' ? SMALL_GLYPH : GLYPH,
+                height: size === 'small' ? SMALL_GLYPH : GLYPH,
                 fill: 'currentColor',
                 ...(state === 'loading' && {
                   '@media (prefers-reduced-motion: no-preference)': {
