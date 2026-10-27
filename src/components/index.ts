@@ -67,6 +67,12 @@ export { default as MenuButton } from './buttons/menu-button';
 export * from './nav-item';
 export { default as NavItem } from './nav-item';
 
+export * from './shortcut-tile';
+export { default as ShortcutTile } from './shortcut-tile';
+
+export * from './shortcut-tiles';
+export { default as ShortcutTiles } from './shortcut-tiles';
+
 export * from './progress-bar';
 export { default as ProgressBar } from './progress-bar';
 
