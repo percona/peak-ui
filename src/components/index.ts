@@ -67,6 +67,12 @@ export { default as MenuButton } from './buttons/menu-button';
 export * from './nav-item';
 export { default as NavItem } from './nav-item';
 
+export * from './shortcut-tile';
+export { default as ShortcutTile } from './shortcut-tile';
+
+export * from './shortcut-tiles';
+export { default as ShortcutTiles } from './shortcut-tiles';
+
 export * from './progress-bar';
 export { default as ProgressBar } from './progress-bar';
 
@@ -98,3 +104,15 @@ export * from './status-icon';
 
 export * from './page-container';
 export { default as PageContainer } from './page-container';
+
+export * from './state-indicator';
+export { default as StateIndicator } from './state-indicator';
+
+export * from './severity-icon';
+export { default as SeverityIcon } from './severity-icon';
+
+export * from './status-banner';
+export { default as StatusBanner } from './status-banner';
+
+export * from './status-card';
+export { default as StatusCard } from './status-card';
