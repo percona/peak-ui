@@ -70,6 +70,12 @@ export { default as NavItem } from './nav-item';
 export * from './nav-flyout';
 export { default as NavFlyout } from './nav-flyout';
 
+export * from './search-trigger';
+export { default as SearchTrigger } from './search-trigger';
+
+export * from './search-dialog';
+export { default as SearchDialog } from './search-dialog';
+
 export * from './progress-bar';
 export { default as ProgressBar } from './progress-bar';
 
@@ -96,6 +102,12 @@ export * from './tooltip';
 export { default as Tooltip } from './tooltip';
 
 export * from './code';
+
+export * from './kbd';
+export { default as Kbd } from './kbd';
+
+export * from './text-highlight';
+export { default as TextHighlight } from './text-highlight';
 
 export * from './status-icon';
 
