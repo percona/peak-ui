@@ -10,6 +10,8 @@ const pkg = JSON.parse(read('package.json')) as {
   files: string[];
   scripts: Record<string, string>;
   peerDependencies: Record<string, string>;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
 };
 const publicExports = Object.keys(peakUi);
 
@@ -22,6 +24,18 @@ describe('published package contents', () => {
   it('has a non-empty AGENTS.md at the package root', () => {
     expect(existsSync(resolve(root, 'AGENTS.md'))).toBe(true);
     expect(read('AGENTS.md')).toMatch(/^# Peak UI/);
+  });
+});
+
+// PMM-15878: MUI X Pro and Premium packages are commercial and need a license key.
+describe('licensing', () => {
+  it('lists no MUI X Pro or Premium package', () => {
+    const listed = Object.keys({
+      ...pkg.dependencies,
+      ...pkg.devDependencies,
+      ...pkg.peerDependencies,
+    });
+    expect(listed.filter((name) => /^@mui\/x-.*-(pro|premium)$/.test(name))).toEqual([]);
   });
 });
 
