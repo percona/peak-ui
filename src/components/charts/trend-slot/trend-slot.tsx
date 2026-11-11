@@ -5,8 +5,14 @@ import { SPARKLINE_DEFAULT_HEIGHT } from '../charts.constants';
 import Sparkline from '../sparkline';
 import type { TrendSlotProps } from './trend-slot.types';
 
-const TrendSlot = ({ sparkline, loading, emptyText, variant }: TrendSlotProps) => {
-  const height = sparkline?.height ?? SPARKLINE_DEFAULT_HEIGHT;
+const TrendSlot = ({
+  sparkline,
+  loading,
+  emptyText,
+  variant,
+  defaultHeight = SPARKLINE_DEFAULT_HEIGHT,
+}: TrendSlotProps) => {
+  const height = sparkline?.height ?? defaultHeight;
   if (loading) return <Skeleton variant="rounded" height={height} />;
   if (!sparkline) return null;
   if (sparkline.data.length === 0) {

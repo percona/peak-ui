@@ -5,14 +5,25 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { CHARTS_EMPTY_TEXT } from '../charts.constants';
 import TrendSlot from '../trend-slot';
+import { STAT_TILE_SIZES } from './stat-tile.constants';
 import type { StatTileProps } from './stat-tile.types';
 
 const StatTile = forwardRef<HTMLDivElement, StatTileProps>(
   (
-    { label, value, sparkline, loading = false, emptyText = CHARTS_EMPTY_TEXT, sx, ...rest },
+    {
+      label,
+      value,
+      sparkline,
+      loading = false,
+      emptyText = CHARTS_EMPTY_TEXT,
+      size = 'medium',
+      sx,
+      ...rest
+    },
     ref
   ) => {
     const labelId = useId();
+    const { p, labelMinWidth, valueVariant, sparklineHeight, trendWidth } = STAT_TILE_SIZES[size];
 
     return (
       <Paper
@@ -22,26 +33,27 @@ const StatTile = forwardRef<HTMLDivElement, StatTileProps>(
         aria-labelledby={labelId}
         aria-busy={loading}
         sx={[
-          { p: 2, display: 'flex', gap: 2, alignItems: 'center', minWidth: 0 },
+          { p, display: 'flex', gap: p, alignItems: 'center', minWidth: 0 },
           ...(Array.isArray(sx) ? sx : [sx]),
         ]}
         {...rest}
       >
-        <Box display="flex" flexDirection="column" minWidth={112}>
+        <Box display="flex" flexDirection="column" flex={trendWidth && 1} minWidth={labelMinWidth}>
           <Typography id={labelId} variant="caption">
             {label}
           </Typography>
-          <Typography variant="h5" component="p" noWrap>
+          <Typography variant={valueVariant} component="p" noWrap>
             {loading ? <Skeleton width={80} /> : value}
           </Typography>
         </Box>
         {(loading || sparkline) && (
-          <Box flex={1} minWidth={0}>
+          <Box flex={trendWidth ? `0 1 ${trendWidth}px` : 1} minWidth={0}>
             <TrendSlot
               sparkline={sparkline}
               loading={loading}
               emptyText={emptyText}
               variant="area"
+              defaultHeight={sparklineHeight}
             />
           </Box>
         )}

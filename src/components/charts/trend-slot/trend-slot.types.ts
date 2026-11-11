@@ -10,4 +10,6 @@ export interface TrendSlotProps {
   emptyText: ReactNode;
   /** How the trend is drawn unless the sparkline sets its own variant. */
   variant: SparklineVariant;
+  /** The trend's height, and its placeholder's, unless the sparkline sets its own. */
+  defaultHeight?: number;
 }

@@ -1,9 +1,11 @@
 import { type Meta, type StoryObj } from '@storybook/react';
 import * as DocBlock from '@storybook/addon-docs/blocks';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import ThemedModePanel from '../../../storybook/themed-mode-panel';
 import { makeSeries, timeFormatter } from '../charts.utils';
 import StatTile from './stat-tile';
+import type { StatTileSize } from './stat-tile.types';
 
 const opsFormatter = (value: number) => `${(value / 1000).toFixed(2)}K ops/s`;
 const operations = makeSeries({ seed: 11, base: 1800, spread: 400 });
@@ -46,6 +48,8 @@ const meta: Meta<typeof StatTile> = {
         component: [
           'A golden-signal tile: what is measured, its current value and a trend of it, such as a cluster’s operations, latency, errors or connections on a Fleet page. Pass the value already formatted with its unit; the tile draws `sparkline` as an area chart unless it says otherwise.',
           '',
+          '`size` small fits a dense row of tiles, such as a cluster summary; medium fits an overview page. Small tightens the padding, sets the value one step smaller and draws a shorter trend.',
+          '',
           'The tile is a group named by its `label`, and the value is plain text. While `loading`, it shows placeholders and reports itself busy; a sparkline with no points shows `emptyText` instead of an empty chart.',
         ].join('\n'),
       },
@@ -65,6 +69,7 @@ const meta: Meta<typeof StatTile> = {
     label: 'Operations',
     value: '1.84K ops/s',
     loading: false,
+    size: 'medium',
     sparkline: {
       data: operations,
       valueFormatter: opsFormatter,
@@ -77,6 +82,10 @@ const meta: Meta<typeof StatTile> = {
     value: { control: 'text' },
     sparkline: { control: false },
     emptyText: { control: 'text' },
+    size: {
+      options: ['small', 'medium'],
+      control: { type: 'inline-radio' },
+    },
   },
 };
 
@@ -93,29 +102,56 @@ export const Playground: Story = {
   ],
 };
 
-const grid = {
+const SIZES = ['medium', 'small'] as const satisfies readonly StatTileSize[];
+
+const grid = (size: StatTileSize) => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-  gap: 2,
-};
+  gridTemplateColumns: `repeat(auto-fill, minmax(${size === 'small' ? 208 : 280}px, 1fr))`,
+  gap: size === 'small' ? 1.5 : 2,
+});
+
+const SignalTiles = ({ size }: { size: StatTileSize }) => (
+  <Box sx={grid(size)}>
+    {signals.map(({ label, value, data, valueFormatter }) => (
+      <StatTile
+        key={label}
+        size={size}
+        label={label}
+        value={value}
+        sparkline={{
+          data,
+          valueFormatter,
+          timeFormatter,
+          ariaLabel: `${label} over the last 30 minutes`,
+        }}
+      />
+    ))}
+  </Box>
+);
 
 export const GoldenSignals: Story = {
   name: 'Golden signals',
   parameters: { controls: { disable: true } },
+  render: () => <SignalTiles size="medium" />,
+};
+
+export const Sizes: Story = {
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      description: {
+        story:
+          'Medium fits an overview page. Small fits a dense row, such as a cluster summary: it tightens the padding, sets the value one step smaller and keeps the trend at 84 × 34, narrowing it only when a long value needs the room.',
+      },
+    },
+  },
   render: () => (
-    <Box sx={grid}>
-      {signals.map(({ label, value, data, valueFormatter }) => (
-        <StatTile
-          key={label}
-          label={label}
-          value={value}
-          sparkline={{
-            data,
-            valueFormatter,
-            timeFormatter,
-            ariaLabel: `${label} over the last 30 minutes`,
-          }}
-        />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {SIZES.map((size) => (
+        <Box key={size} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography variant="overline">{size}</Typography>
+          <SignalTiles size={size} />
+        </Box>
       ))}
     </Box>
   ),
@@ -125,10 +161,20 @@ export const States: Story = {
   name: 'Loading and no data',
   parameters: { controls: { disable: true } },
   render: () => (
-    <Box sx={grid}>
-      <StatTile label="Operations" value="1.84K ops/s" sparkline={{ data: operations }} loading />
-      <StatTile label="Replication lag" value="—" sparkline={{ data: [] }} />
-      <StatTile label="Uptime" value="41 d" />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {SIZES.map((size) => (
+        <Box key={size} sx={grid(size)}>
+          <StatTile
+            size={size}
+            label="Operations"
+            value="1.84K ops/s"
+            sparkline={{ data: operations }}
+            loading
+          />
+          <StatTile size={size} label="Replication lag" value="—" sparkline={{ data: [] }} />
+          <StatTile size={size} label="Uptime" value="41 d" />
+        </Box>
+      ))}
     </Box>
   ),
 };
@@ -140,16 +186,23 @@ export const ColorModes: Story = {
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
       {(['light', 'dark'] as const).map((mode) => (
         <ThemedModePanel key={mode} mode={mode} themeName={globals.theme ?? 'base'}>
-          <StatTile
-            label={`Operations (${mode})`}
-            value="1.84K ops/s"
-            sparkline={{
-              data: operations,
-              valueFormatter: opsFormatter,
-              timeFormatter,
-              ariaLabel: `Operations over the last 30 minutes, ${mode} mode`,
-            }}
-          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+            {SIZES.map((size) => (
+              <StatTile
+                key={size}
+                size={size}
+                label="Operations"
+                value="1.84K ops/s"
+                sparkline={{
+                  data: operations,
+                  valueFormatter: opsFormatter,
+                  timeFormatter,
+                  ariaLabel: `Operations over the last 30 minutes, ${mode} mode, ${size}`,
+                }}
+                sx={{ width: size === 'small' ? 208 : 320 }}
+              />
+            ))}
+          </Box>
         </ThemedModePanel>
       ))}
     </Box>

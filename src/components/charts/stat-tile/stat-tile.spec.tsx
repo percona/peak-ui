@@ -44,6 +44,16 @@ describe('StatTile', () => {
     expect(container.querySelector('.MuiSkeleton-rounded')).toHaveStyle({ height: '32px' });
   });
 
+  it('draws a smaller value and a shorter trend at the small size', () => {
+    const { container } = renderInTheme(
+      <StatTile label="p99 read" value="38 ms" size="small" loading />
+    );
+
+    expect(screen.getByRole('group', { name: 'p99 read' })).toHaveStyle({ padding: '12px' });
+    expect(container.querySelector('.MuiTypography-h6')).toBeInTheDocument();
+    expect(container.querySelector('.MuiSkeleton-rounded')).toHaveStyle({ height: '34px' });
+  });
+
   it('says there is no data when the trend has no points', () => {
     renderInTheme(<StatTile label="Saturation" value="—" sparkline={{ data: [] }} />);
 
