@@ -1,0 +1,1 @@
+import{r as e}from"./iframe-yeqCCPPQ.js";function usePreviousProps(r){const s=e.useRef({});return e.useEffect(()=>{s.current=r}),s.current}(0,Object.defineProperty)(usePreviousProps,"name",{value:"usePreviousProps",configurable:!0});export{usePreviousProps as u};
