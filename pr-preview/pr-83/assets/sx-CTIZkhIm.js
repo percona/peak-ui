@@ -1,1 +1,0 @@
-var e=Object.defineProperty,__name=(a,r)=>e(a,"name",{value:r,configurable:!0});const a=__name((e,r)=>"function"==typeof e?e(r):Array.isArray(e)?Object.assign({},...e.filter(Boolean).map(e=>a(e,r))):e??{},"flattenSx"),r=__name((e,r)=>r?e?t=>({...a(e,t),...a(r,t)}):r:e,"mergeSx");export{r as m};

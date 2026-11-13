@@ -1,1 +1,0 @@
-import{w as e}from"./iframe-DT9_bVcg.js";function getThemeProps(o){const{theme:t,name:n,props:r}=o;return t&&t.components&&t.components[n]&&t.components[n].defaultProps?e(t.components[n].defaultProps,r):r}(0,Object.defineProperty)(getThemeProps,"name",{value:"getThemeProps",configurable:!0});export{getThemeProps as g};

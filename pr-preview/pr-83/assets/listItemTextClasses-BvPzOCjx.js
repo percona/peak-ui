@@ -1,1 +1,0 @@
-import{x as t,y as e}from"./iframe-DT9_bVcg.js";function getListItemTextUtilityClass(t){return e("MuiListItemText",t)}(0,Object.defineProperty)(getListItemTextUtilityClass,"name",{value:"getListItemTextUtilityClass",configurable:!0});const i=t("MuiListItemText",["root","multiline","dense","inset","primary","secondary"]);export{getListItemTextUtilityClass as g,i as l};
