@@ -1,1 +1,0 @@
-import{r as e}from"./iframe-DyiFNdbg.js";function isMuiElement(i,m){return e.isValidElement(i)&&-1!==m.indexOf(i.type.muiName??i.type?._payload?.value?.muiName)}(0,Object.defineProperty)(isMuiElement,"name",{value:"isMuiElement",configurable:!0});export{isMuiElement as i};

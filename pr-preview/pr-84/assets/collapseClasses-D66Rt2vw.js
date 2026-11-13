@@ -1,0 +1,1 @@
+import{x as e,y as l}from"./iframe-BQLc9uOR.js";function getCollapseUtilityClass(e){return l("MuiCollapse",e)}(0,Object.defineProperty)(getCollapseUtilityClass,"name",{value:"getCollapseUtilityClass",configurable:!0});const t=e("MuiCollapse",["root","horizontal","vertical","entered","hidden","wrapper","wrapperInner"]);export{t as c,getCollapseUtilityClass as g};
