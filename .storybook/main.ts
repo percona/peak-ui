@@ -14,6 +14,7 @@ const config: StorybookConfig = {
   staticDirs: ["./static"],
   addons: [
     "@storybook/addon-docs",
+    "@storybook/addon-a11y",
     "storybook-addon-pseudo-states",
     "storybook-addon-tag-badges",
   ],
