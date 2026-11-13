@@ -82,7 +82,7 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 
 - `main`, `types`, `exports` → `./src/index.ts`. `publishConfig` holds `access: public` plus today's `dist` values for `main`, `types` and `exports`; pnpm applies these overrides when packing.
 - `version: "0.0.0"` in the tree; the real version only exists in the published tarball (§4).
-- `files` adds `CHANGELOG.md`, which npm doesn't include on its own. CI generates it (§4); `ui/.gitignore` ignores `packages/peak-ui/CHANGELOG.md` so a local run never gets committed.
+- `files` lists only what ships: `dist/index.js`, its sourcemap, `dist/index.d.ts`, `AGENTS.md`, `llms.txt` and `CHANGELOG.md`. CI generates the changelog (§4); `ui/.gitignore` ignores `packages/peak-ui/CHANGELOG.md` so a local run never gets committed. Per-file declarations (story ones included) stay out, and Rollup strips pnpm's store folders from sourcemap paths, so neither a story edit nor a peer-version bump changes the package.
 - Peer `react` / `react-dom`: `^18.3.1 || ^19.0.0`. Dev deps move to React 19 and `@types/react` 19, matching `apps/pmm`, so pnpm links one React, Emotion and MUI across the workspace (two Emotion copies mean two theme contexts and a silently unthemed UI).
 - Drop the `react-is` 18.3.1 dependency and both `overrides` blocks. Package-level overrides are ignored in a workspace, only Storybook's alias uses `react-is`, and react-is 18 misreads React 19 elements. Add `react-is` as a dev dependency matching React 19 for that alias. Pinning it never helped npm consumers: a dependency cannot override MUI's own `react-is`.
 - TypeScript → workspace `~6.0.3`. MUI resolves through the workspace's 7.3.11 override, so Peak UI is tested against the MUI PMM ships. Vite, Vitest and Storybook keep Peak UI's own versions (`apps/pmm` is on Vite 8; Storybook only needs the Vite it builds with).
@@ -109,7 +109,7 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 **`.github/workflows/peak-ui-chromatic.yml` in `percona/pmm`:**
 
 - Paths: `ui/packages/peak-ui/**`, `ui/pnpm-workspace.yaml` (holds the MUI pin), and the workflow file itself. Lockfile-only dependency bumps don't trigger it.
-- Triggers: `push` to `main` (refreshes the permalink); `pull_request` for same-repo branches; `pull_request_target` for forks, gated by a `chromatic-external` environment with required reviewers (the pattern `percona/peak-ui` uses today).
+- Triggers: `push` to `main` (refreshes the permalink); `pull_request` for same-repo branches; `pull_request_target` for forks, gated by a `chromatic-external` environment with required reviewers (the pattern `percona/peak-ui` uses today). The fork job uses no dependency cache: one it saved could reach the release build, which uses none either.
 - Chromatic options: `workingDir: ui/packages/peak-ui`, `buildScriptName: storybook:build`, `onlyChanged: true` (TurboSnap), `exitZeroOnChanges: false`; checkout with `fetch-depth: 0` and, on PRs, the PR head ref.
 - A full run is ~160 snapshots (31 story files, no modes). TurboSnap limits a one-component PR to its affected stories; `.storybook/` or `package.json` changes still snapshot everything.
 - An unaccepted visual change fails the check; PMM's merge-gatekeeper waits on existing checks, so it blocks merge until someone accepts in Chromatic and re-runs the job. PRs that don't touch Peak UI never get the check. A fork PR waiting longer than the gatekeeper's 20-minute timeout for environment approval needs a gatekeeper re-run.
@@ -235,7 +235,7 @@ First release from the PMM monorepo. Continues from 1.0.32.
 | P1 | Chromatic permalink public without login | — | Verified 2026-11-12 |
 | P2 | Pages keeps serving after `percona/peak-ui` is archived | Check before archiving | Open |
 | P3 | npm admin on `@percona/peak-ui` adds the trusted publisher | Current npm publisher | Open |
-| P4 | `percona/pmm` admin adds `CHROMATIC_PROJECT_TOKEN`, `chromatic-external` and `npm` environments, and grants the Chromatic GitHub app access | `percona/pmm` admin | Open |
+| P4 | `percona/pmm` admin adds `CHROMATIC_PROJECT_TOKEN` (also as a Dependabot secret, since Dependabot's daily action bumps touch the Chromatic workflow), `chromatic-external` and `npm` environments, and grants the Chromatic GitHub app access | `percona/pmm` admin | Open |
 | P5 | Jenkins' `v3.x.y` tag push triggers Actions (only `GITHUB_TOKEN` pushes don't) | Confirm on first release; fallback `workflow_dispatch` on the tag | Open |
 | P6 | Next release-branch cut date decides the first published version | Release manager | Open |
 | R1 | Storybook 10 / Rollup TS plugin on TypeScript 6 | Caught by `make ci` in the PMM PR | — |
