@@ -98,7 +98,7 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 
 **Consumers:**
 
-- `apps/pmm`, `packages/extensions/framework`, `packages/plugins/atw`: `"@percona/peak-ui": "workspace:*"` in `dependencies`; the two `peerDependencies` entries become `workspace:*` too. `framework` and `atw` move from 1.0.26 to current; fix any breakage in the same commit.
+- `apps/pmm`, `packages/extensions/framework`, `packages/plugins/atw`, `packages/plugins/om`: `"@percona/peak-ui": "workspace:*"` in `dependencies` (om: `devDependencies`); the `peerDependencies` entries become `workspace:*` too. A Peak UI spec fails when any workspace package pins an npm version, since that would install a second Peak UI with its own theme context. `framework` and `atw` move from 1.0.26 to current; fix any breakage in the same commit.
 - Remove `@percona/peak-ui` from `minimumReleaseAgeExclude` in `ui/pnpm-workspace.yaml`.
 - Remove the `server.watch.ignored` entry for `node_modules/@percona/peak-ui` from `apps/pmm/vite.config.ts`; Vite resolves the workspace link to `packages/peak-ui/src`, which it already watches.
 - Add `storybook-static` to `ui/.gitignore`.
