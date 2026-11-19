@@ -1,35 +1,51 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { FormProvider, useForm, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { MenuItem, TextFieldProps } from '@mui/material';
 import TextInput from './text';
+import { TextInputProps } from './text.types';
 
 const StoredValue = () => {
   const value = useWatch({ name: 'host' });
   return <span data-testid="stored-value">{JSON.stringify(value)}</span>;
 };
 
+const TouchedState = () => {
+  const { touchedFields } = useFormState({ name: 'host' });
+  return <span data-testid="touched">{String(!!touchedFields.host)}</span>;
+};
+
 const Form = ({
   textFieldProps,
+  transform,
+  defaultValue = '',
   children,
 }: {
   textFieldProps?: TextFieldProps;
+  transform?: TextInputProps['transform'];
+  defaultValue?: unknown;
   children?: React.ReactNode;
 }) => {
-  const methods = useForm({ defaultValues: { host: '' } });
+  const methods = useForm<{ host: unknown }>({ defaultValues: { host: defaultValue } });
 
   return (
     <FormProvider {...methods}>
-      {children ?? <TextInput name="host" textFieldProps={textFieldProps} />}
+      {children ?? <TextInput name="host" textFieldProps={textFieldProps} transform={transform} />}
       <StoredValue />
+      <TouchedState />
     </FormProvider>
   );
 };
 
-const type = (value: string) =>
-  fireEvent.change(screen.getByTestId('text-input-host'), { target: { value } });
+const input = () => screen.getByTestId('text-input-host');
+
+const type = (value: string) => fireEvent.change(input(), { target: { value } });
+
+const blur = () => fireEvent.blur(input());
 
 const storedValue = () => JSON.parse(screen.getByTestId('stored-value').textContent ?? '');
+
+const isTouched = () => screen.getByTestId('touched').textContent === 'true';
 
 describe('TextInput', () => {
   it('stores the raw text when no onChange is given', () => {
@@ -38,56 +54,52 @@ describe('TextInput', () => {
     type('abc');
 
     expect(storedValue()).toBe('abc');
-    expect(screen.getByTestId('text-input-host')).toHaveValue('abc');
+    expect(input()).toHaveValue('abc');
   });
 
-  it('stores the value returned by textFieldProps.onChange', () => {
-    const toUpper = (e: React.ChangeEvent<HTMLInputElement>) => e.target.value.toUpperCase();
-    render(<Form textFieldProps={{ onChange: toUpper as TextFieldProps['onChange'] }} />);
+  describe('textFieldProps.onChange', () => {
+    it.each<[string, unknown]>([
+      ['a string', 'ABC'],
+      ['an empty string', ''],
+      ['a number', 42],
+      ['null', null],
+      ['a promise', Promise.resolve('ABC')],
+    ])('stores the typed text when it returns %s', (_, returned) => {
+      const onChange = vi.fn(() => returned);
+      render(<Form textFieldProps={{ onChange }} />);
 
-    type('abc');
+      type('abc');
 
-    expect(storedValue()).toBe('ABC');
-    expect(screen.getByTestId('text-input-host')).toHaveValue('ABC');
-  });
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(storedValue()).toBe('abc');
+      expect(input()).toHaveValue('abc');
+    });
 
-  it('stores the raw text when textFieldProps.onChange returns nothing', () => {
-    const onChange = vi.fn();
-    render(<Form textFieldProps={{ onChange }} />);
+    it('is called after the typed text is stored', () => {
+      let storedWhenCalled: unknown;
+      const Probe = () => {
+        const { getValues } = useFormContext();
+        return (
+          <TextInput
+            name="host"
+            textFieldProps={{
+              onChange: () => {
+                storedWhenCalled = getValues('host');
+              },
+            }}
+          />
+        );
+      };
+      render(
+        <Form>
+          <Probe />
+        </Form>
+      );
 
-    type('abc');
+      type('abc');
 
-    expect(onChange).toHaveBeenCalledTimes(1);
-    expect(storedValue()).toBe('abc');
-  });
-
-  it('stores the raw text when textFieldProps.onChange returns a promise', () => {
-    const onChange = vi.fn(async () => undefined);
-    render(<Form textFieldProps={{ onChange }} />);
-
-    type('abc');
-
-    expect(storedValue()).toBe('abc');
-  });
-
-  it('stores the raw text when textFieldProps.onChange returns null', () => {
-    const onChange = vi.fn(() => null);
-    render(<Form textFieldProps={{ onChange }} />);
-
-    type('abc');
-
-    expect(storedValue()).toBe('abc');
-    expect(screen.getByTestId('text-input-host')).toHaveValue('abc');
-  });
-
-  it('clears the stored value when textFieldProps.onChange returns an empty string', () => {
-    const onChange = vi.fn(() => '');
-    render(<Form textFieldProps={{ onChange }} />);
-
-    type('abc');
-
-    expect(storedValue()).toBe('');
-    expect(screen.getByTestId('text-input-host')).toHaveValue('');
+      expect(storedWhenCalled).toBe('abc');
+    });
   });
 
   it('stores the text when InputProps.onChange is given, and calls it after the store', () => {
@@ -236,13 +248,107 @@ describe('TextInput', () => {
     expect(storedValue()).toBe('b');
   });
 
-  it('stores the value returned by textFieldProps.onBlur', () => {
-    const trim = (e: React.FocusEvent<HTMLInputElement>) => e.target.value.trim();
-    render(<Form textFieldProps={{ onBlur: trim as TextFieldProps['onBlur'] }} />);
+  describe('textFieldProps.onBlur', () => {
+    it.each<[string, unknown]>([
+      ['the trimmed text', 'abc'],
+      ['nothing', undefined],
+    ])('keeps the typed text when it returns %s', (_, returned) => {
+      const onBlur = vi.fn(() => returned);
+      render(<Form textFieldProps={{ onBlur }} />);
 
-    type('  abc  ');
-    fireEvent.blur(screen.getByTestId('text-input-host'));
+      type('  abc  ');
+      blur();
 
-    expect(storedValue()).toBe('abc');
+      expect(onBlur).toHaveBeenCalledTimes(1);
+      expect(storedValue()).toBe('  abc  ');
+    });
+
+    it('marks the field as touched', () => {
+      render(<Form textFieldProps={{ onBlur: vi.fn() }} />);
+
+      blur();
+
+      expect(isTouched()).toBe(true);
+    });
+  });
+
+  it('marks the field as touched on blur', () => {
+    render(<Form />);
+
+    blur();
+
+    expect(isTouched()).toBe(true);
+  });
+
+  const slotsWithBlur: [string, (onBlur?: () => void) => TextFieldProps][] = [
+    ['InputProps', (onBlur) => ({ InputProps: { onBlur } })],
+    ['slotProps.input', (onBlur) => ({ slotProps: { input: { onBlur } } })],
+    ['a slotProps.input callback', (onBlur) => ({ slotProps: { input: () => ({ onBlur }) } })],
+  ];
+
+  it.each(slotsWithBlur)('marks the field as touched when %s has its own onBlur', (_, props) => {
+    const onBlur = vi.fn();
+    render(<Form textFieldProps={props(onBlur)} />);
+
+    blur();
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(isTouched()).toBe(true);
+  });
+
+  it.each(slotsWithBlur)(
+    'marks the field as touched when the onBlur of %s is explicitly undefined',
+    (_, props) => {
+      render(<Form textFieldProps={props(undefined)} />);
+
+      blur();
+
+      expect(isTouched()).toBe(true);
+    }
+  );
+
+  describe('transform', () => {
+    it('stores and shows what output returns', () => {
+      render(<Form transform={{ output: (text) => text.toUpperCase() }} />);
+
+      type('abc');
+
+      expect(storedValue()).toBe('ABC');
+      expect(input()).toHaveValue('ABC');
+    });
+
+    it('shows the stored value through input', () => {
+      render(
+        <Form
+          defaultValue={['a', 'b']}
+          transform={{
+            input: (value) => (value as string[]).join(' '),
+            output: (text) => text.split(' '),
+          }}
+        />
+      );
+
+      expect(input()).toHaveValue('a b');
+
+      type('a b c');
+
+      expect(storedValue()).toEqual(['a', 'b', 'c']);
+      expect(input()).toHaveValue('a b c');
+    });
+
+    it('stores what output returns when InputProps has its own onChange', () => {
+      const onInputChange = vi.fn();
+      render(
+        <Form
+          textFieldProps={{ InputProps: { onChange: onInputChange } }}
+          transform={{ output: (text) => text.toUpperCase() }}
+        />
+      );
+
+      type('abc');
+
+      expect(onInputChange).toHaveBeenCalledTimes(1);
+      expect(storedValue()).toBe('ABC');
+    });
   });
 });

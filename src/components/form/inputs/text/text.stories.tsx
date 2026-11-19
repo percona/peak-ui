@@ -6,7 +6,6 @@ import TextInput from './text';
 import { TextInputProps } from './text.types';
 import { useState } from 'react';
 import { IconButton, InputAdornment } from '@mui/material';
-import type { TextFieldProps } from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { SearchOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
 
@@ -686,10 +685,8 @@ return (
     <TextInput
       name="host"
       label="Host"
-      textFieldProps={{
-        placeholder: "Type a host name",
-        onChange: (e) => e.target.value.toUpperCase(),
-      }}
+      textFieldProps={{ placeholder: "Type a host name" }}
+      transform={{ output: (text) => text.toUpperCase() }}
     />
     <Typography>Stored value: {JSON.stringify(methods.watch('host'))}</Typography>
   </FormProvider>
@@ -711,11 +708,8 @@ return (
         <TextInput
           name={name}
           label={label}
-          textFieldProps={{
-            placeholder,
-            onChange: ((e: React.ChangeEvent<HTMLInputElement>) =>
-              e.target.value.toUpperCase()) as TextFieldProps['onChange'],
-          }}
+          textFieldProps={{ placeholder }}
+          transform={{ output: (text) => text.toUpperCase() }}
         />
         <Typography data-testid="stored-value" sx={{ mt: 2 }}>
           Stored value: {JSON.stringify(methods.watch(name))}
