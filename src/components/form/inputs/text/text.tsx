@@ -4,30 +4,45 @@ import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { TextInputProps } from './text.types';
 
 type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+type InputBlurEvent = React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>;
 type SelectSlotProps = NonNullable<TextFieldProps['slotProps']>['select'];
-type SlotPropsWithChange =
-  | { onChange?: (event: InputChangeEvent, ...rest: unknown[]) => void }
+type FieldHandlers = {
+  onChange: (event: InputChangeEvent) => void;
+  onBlur: (event: InputBlurEvent) => void;
+};
+type SlotPropsWithHandlers =
+  | {
+      onChange?: (event: InputChangeEvent, ...rest: unknown[]) => void;
+      onBlur?: (event: InputBlurEvent, ...rest: unknown[]) => void;
+    }
   | undefined;
 
-// A slot's own onChange replaces the TextField's in MUI, so the form write is composed into it.
-const withStoreValue = (slot: unknown, storeValue: (event: InputChangeEvent) => void) => {
-  const compose = (props: SlotPropsWithChange) => {
+// A slot's own onChange or onBlur replaces the TextField's in MUI, so the form's handler is composed into it.
+const withFieldHandlers = (slot: unknown, handlers: FieldHandlers) => {
+  const compose = (props: SlotPropsWithHandlers) => {
     if (!props) return props;
-    const { onChange: slotOnChange, ...slotProps } = props;
-    if (!slotOnChange) return slotProps;
+    const { onChange: slotOnChange, onBlur: slotOnBlur, ...slotProps } = props;
 
     return {
       ...slotProps,
-      onChange: (event: InputChangeEvent, ...rest: unknown[]) => {
-        storeValue(event);
-        slotOnChange(event, ...rest);
-      },
+      ...(slotOnChange && {
+        onChange: (event: InputChangeEvent, ...rest: unknown[]) => {
+          handlers.onChange(event);
+          slotOnChange(event, ...rest);
+        },
+      }),
+      ...(slotOnBlur && {
+        onBlur: (event: InputBlurEvent, ...rest: unknown[]) => {
+          handlers.onBlur(event);
+          slotOnBlur(event, ...rest);
+        },
+      }),
     };
   };
 
   return typeof slot === 'function'
     ? (ownerState: unknown) => compose(slot(ownerState))
-    : compose(slot as SlotPropsWithChange);
+    : compose(slot as SlotPropsWithHandlers);
 };
 
 const TextInput = <T extends FieldValues = FieldValues>({
@@ -36,40 +51,51 @@ const TextInput = <T extends FieldValues = FieldValues>({
   label,
   controllerProps,
   textFieldProps = {},
+  transform,
   isRequired,
   formHelperTextProps = {},
 }: TextInputProps<T>) => {
   const formContext = useFormContext<T>();
   const contextControl = formContext?.control;
 
-  const { sx: textFieldPropsSx, onChange, slotProps, ...restFieldProps } = textFieldProps;
+  const { sx: textFieldPropsSx, onChange, onBlur, slotProps, ...restFieldProps } = textFieldProps;
   const { sx: formHelperTextPropsSx } = formHelperTextProps;
 
   return (
     <Controller
       name={name}
       control={control ?? contextControl}
-      render={({ field: { onChange: fieldOnChange, ...field }, fieldState: { error } }) => {
-        const storeValue = (event: InputChangeEvent) => {
-          const transformed: unknown = onChange?.(event);
-          const isValue = typeof transformed === 'string' || typeof transformed === 'number';
-          fieldOnChange(isValue ? transformed : event);
+      render={({
+        field: { onChange: fieldOnChange, onBlur: fieldOnBlur, value, ...field },
+        fieldState: { error },
+      }) => {
+        const handlers: FieldHandlers = {
+          onChange: (event) => {
+            fieldOnChange(transform?.output ? transform.output(event.target.value) : event);
+            onChange?.(event);
+          },
+          onBlur: (event) => {
+            fieldOnBlur();
+            onBlur?.(event);
+          },
         };
 
         return (
           <TextField
             label={label}
             {...field}
+            value={transform?.input ? transform.input(value) : value}
             size={restFieldProps?.size || 'small'}
             sx={{ mt: 3, ...textFieldPropsSx }}
             {...restFieldProps}
-            onChange={storeValue}
+            onChange={handlers.onChange}
+            onBlur={handlers.onBlur}
             slotProps={{
               ...slotProps,
-              input: withStoreValue(slotProps?.input ?? restFieldProps.InputProps, storeValue),
-              select: withStoreValue(
+              input: withFieldHandlers(slotProps?.input ?? restFieldProps.InputProps, handlers),
+              select: withFieldHandlers(
                 slotProps?.select ?? restFieldProps.SelectProps,
-                storeValue
+                handlers
               ) as SelectSlotProps,
             }}
             variant="outlined"
@@ -82,18 +108,6 @@ const TextInput = <T extends FieldValues = FieldValues>({
               'data-testid': `text-input-${kebabize(name)}`,
               onWheel: (e) => {
                 (e.target as HTMLElement).blur();
-              },
-              onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
-                if (textFieldProps?.onBlur) {
-                  const modifiedEvent = {
-                    ...event,
-                    target: {
-                      ...event.target,
-                      value: textFieldProps.onBlur(event),
-                    },
-                  };
-                  fieldOnChange(modifiedEvent);
-                }
               },
               ...restFieldProps?.inputProps,
             }}

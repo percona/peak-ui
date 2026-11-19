@@ -24,8 +24,15 @@ export type TextInputProps<T extends FieldValues = FieldValues> = {
   name: FieldPath<T>;
   /** Label shown on the field's top border; it stays there even while the field is empty. */
   label?: string;
-  /** MUI TextField props such as placeholder or multiline; a string or number returned by onChange replaces what is stored (anything else, even null, keeps the typed text), and an onBlur must return the text to store. */
+  /** MUI TextField props such as placeholder or multiline; onChange and onBlur only listen, run after the form updates, and never change what is stored. */
   textFieldProps?: TextFieldProps;
+  /** Changes what the form stores as the user types, and how a stored value shows in the field. */
+  transform?: {
+    /** Maps the stored value to the text the field shows. */
+    input?: (formValue: unknown) => string;
+    /** Maps the typed text to the value the form stores; runs on every change. */
+    output?: (text: string) => unknown;
+  };
   /** Adds an asterisk to the label and makes the browser block form submit while the field is empty; rules go in `controllerProps.rules`. */
   isRequired?: boolean;
   /** Styles for the helper or error text under the field; only `sx` is applied. */
