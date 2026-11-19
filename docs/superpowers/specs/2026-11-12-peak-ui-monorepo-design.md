@@ -87,14 +87,15 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 - Peer `react` / `react-dom`: `^18.3.1 || ^19.0.0`. Dev deps move to React 19 and `@types/react` 19, matching `apps/pmm`, so pnpm links one React, Emotion and MUI across the workspace (two Emotion copies mean two theme contexts and a silently unthemed UI).
 - Drop the `react-is` 18.3.1 dependency and both `overrides` blocks. Package-level overrides are ignored in a workspace, only Storybook's alias uses `react-is`, and react-is 18 misreads React 19 elements. Add `react-is` as a dev dependency matching React 19 for that alias. Pinning it never helped npm consumers: a dependency cannot override MUI's own `react-is`.
 - TypeScript → workspace `~6.0.3`. MUI resolves through the workspace's 7.3.11 override, so Peak UI is tested against the MUI PMM ships. Vite, Vitest and Storybook keep Peak UI's own versions (`apps/pmm` is on Vite 8; Storybook only needs the Vite it builds with).
-- Scripts follow workspace names: `typecheck` → `check-types` (both tsconfigs), `lint` → `oxlint --config ../../oxlintrc.json src .storybook scripts`, `format` → `oxfmt --write .`, `format:check` → `oxfmt --check .` (oxfmt finds `ui/.oxfmtrc.json` from the package folder). `build` (Rollup), `test`, `storybook:dev`, `storybook:build`, `prepack` stay.
+- Scripts follow workspace names: `typecheck` → `check-types` (both tsconfigs), `lint` → `oxlint --config ../../oxlintrc.json src .storybook scripts`, `format` → `oxfmt --write .`, `format:check` → `oxfmt --check .` (oxfmt finds `ui/.oxfmtrc.json` from the package folder). `build` becomes `build:package` (Rollup, run by `prepack`), so turbo's `build` (also PMM's image build, `make -C ui release`) doesn't run it; `test`, `storybook:dev`, `storybook:build` stay.
 - `ui/oxlintrc.json` gains an override for `packages/peak-ui/**` that lifts the `material-react-table` import restriction: Peak UI's `Table` is the one place allowed to wrap it.
 
 **Source changes:**
 
 - Replace the `@/utils` alias with relative imports (10 files); remove `paths` from `tsconfig.json`, `tsconfigPaths()` from `vitest.config.ts` and `.storybook/main.ts`, and the `vite-tsconfig-paths` dev dependency.
-- `tsconfig.json` extends `../../tsconfig.base.json`, so Peak UI's own `check-types` enforces what its consumers apply (`noImplicitReturns` and the rest).
-- turbo's `build` now runs Peak UI's Rollup build in every `make ci`, catching a broken bundle long before a release.
+- `tsconfig.json` extends `../../tsconfig.base.json`, so Peak UI's own `check-types` enforces what its consumers apply (`noImplicitReturns` and the rest), and sets `lib` to `apps/pmm`'s ES2020, which compiles this source. `target` stays ESNext, so the bundle doesn't change.
+- UI CI builds the bundle in a step of its own (`pnpm --filter @percona/peak-ui build:package`), catching a broken bundle long before a release.
+- A Peak UI spec fails when a consumer resolves a different copy of any of Peak UI's peers (React, Emotion, MUI, the date pickers, react-hook-form, notistack): Peak UI's imports resolve from its own `node_modules`, so a one-sided version bump would split a React context.
 
 **Consumers:**
 
@@ -109,9 +110,9 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 
 **`.github/workflows/peak-ui-chromatic.yml` in `percona/pmm`:**
 
-- Paths: `ui/packages/peak-ui/**`, `ui/pnpm-workspace.yaml` (holds the MUI pin), and the workflow file itself. Lockfile-only dependency bumps don't trigger it.
+- Paths: `ui/packages/peak-ui/**`, `ui/pnpm-workspace.yaml` (holds the MUI pin), `ui/pnpm-lock.yaml` (a bumped bundled dependency can change rendering), `ui/tsconfig.base.json`, and the workflow file itself. TurboSnap keeps lockfile bumps that don't reach Peak UI cheap.
 - Triggers: `push` to `main` (refreshes the permalink); `pull_request` for same-repo branches; `pull_request_target` for forks, gated by a `chromatic-external` environment with required reviewers (the pattern `percona/peak-ui` uses today). The fork job uses no dependency cache: one it saved could reach the release build, which uses none either.
-- Chromatic options: `workingDir: ui/packages/peak-ui`, `buildScriptName: storybook:build`, `onlyChanged: true` (TurboSnap), `exitZeroOnChanges: false`; checkout with `fetch-depth: 0` and, on PRs, the PR head ref.
+- Runs the `chromatic` CLI (a pinned Peak UI dev dependency): percona/pmm's Actions policy allows only actions owned by percona or GitHub, so `chromaui/action` can't run. Options: `--build-script-name storybook:build`, `--storybook-base-dir ui/packages/peak-ui`, `--only-changed` (TurboSnap); visual changes fail the run. Checkout with `fetch-depth: 0` and, on PRs, the PR head ref. Both jobs get read-only contents and no GitHub token; the Chromatic GitHub app posts its own statuses.
 - A full run is ~160 snapshots (31 story files, no modes). TurboSnap limits a one-component PR to its affected stories; `.storybook/` or `package.json` changes still snapshot everything.
 - An unaccepted visual change fails the check; PMM's merge-gatekeeper waits on existing checks, so it blocks merge until someone accepts in Chromatic and re-runs the job. PRs that don't touch Peak UI never get the check. A fork PR waiting longer than the gatekeeper's 20-minute timeout for environment approval needs a gatekeeper re-run.
 
@@ -138,13 +139,13 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
   2. `VERSION` = tag name without `v` on a tag ref, else the `version` input (required on a branch ref).
   3. Set `version` to `$VERSION` in the package; `pnpm pack` (runs `prepack` → build, applies `publishConfig`) for a candidate tarball.
   4. Previous release = the highest version on npm below `$VERSION`; download it with `npm pack @percona/peak-ui@<previous>`.
-  5. Write `CHANGELOG.md` from the two tarballs and git (see Changelog below), write its newest entry to the job summary, and `pnpm pack` again so the final tarball includes it.
+  5. Write `CHANGELOG.md` from the two tarballs and git (see Changelog below), write its newest entry to the job summary, and `pnpm pack --config.ignore-scripts=true` so the final tarball adds it to the `dist` that was compared, without a second build.
   6. Assert the tarball: `dist/index.js`, `dist/index.d.ts`, `AGENTS.md`, `llms.txt`, `CHANGELOG.md` present; packed `package.json` `main`/`types`/`exports` point at `dist/`, none at `src/`.
-  7. `npm publish --dry-run <tarball>`; choose the dist-tag: `latest` when `$VERSION` is greater than the current `latest`, otherwise `release-<major>.<minor>` (a late patch on an older line must not move `latest` backwards); upload the tarball as a workflow artifact.
+  7. `npm publish --dry-run <tarball>`; upload the tarball with `scripts/versions.mjs`. The publish job chooses the dist-tag right before publishing, against `latest` at that moment: `latest` when `$VERSION` is greater than the current `latest`, otherwise `release-<major>.<minor>` (a late patch on an older line, or a late re-run, must not move `latest` backwards).
 - **`publish` job** (`needs: pack`; runs only when `github.ref_type == 'tag'` and not `dry_run`; environment `npm`, restricted to `v*` tags; `id-token: write`; concurrency grouped per tag):
-  1. Download the tarball; upgrade npm to ≥ 11.5.1 (first version with trusted publishing; Node 22 bundles npm 10).
+  1. Download the tarball; install npm 11.21.2, pinned (trusted publishing needs ≥ 11.5.1; Node 22 bundles npm 10).
   2. If `npm view @percona/peak-ui@$VERSION version` returns a value, exit successfully — re-runs are harmless.
-  3. `npm publish <tarball> --provenance --access public --tag <dist-tag from pack>`. npm, not pnpm, uploads: npm does the OIDC exchange, and the tarball already went through pnpm's `publishConfig`.
+  3. `npm publish <tarball> --provenance --access public --tag <dist-tag>`. npm, not pnpm, uploads: npm does the OIDC exchange, and the tarball already went through pnpm's `publishConfig`.
 - Every PMM release publishes, including patches where Peak UI is unchanged, so `3.10.1` always means "the Peak UI in PMM 3.10.1". Its changelog entry reads `No changes to Peak UI`.
 
 **One-time setup:**
@@ -159,8 +160,8 @@ PMM release tags are annotated `v3.x.y` tags made by Jenkins on `pmm-3.x.y` bran
 - **Previous release:** the highest version on npm below `$VERSION`, so a late 3.9.2 compares against 3.9.1, not 3.10.0.
 - **Did anything change?** Compare the candidate tarball with the previous release's tarball file by file, ignoring the `version` field and `CHANGELOG.md`. This checks what ships rather than the history, so reverts, cherry-picks, and changes to stories or tests only all come out right. It also catches bundled dependencies: Rollup inlines `material-react-table` and `prism-react-renderer` into `dist/index.js`, so a lockfile-only bump changes the package without touching the Peak UI folder.
 - **Identical package:** the entry is `No changes to Peak UI`.
-- **Changed package:** one line per commit in `git log --no-merges --cherry-pick --right-only v<previous>...HEAD` that touches what feeds the package (`src/` minus stories, specs, MDX and story helpers, plus `package.json`, `tsconfig.json`, `rollup.config.js` and its sourcemap helper, `AGENTS.md`, `llms.txt`, `README.md` and `LICENSE`; never tests, test setup or Storybook config), using PMM's commit title. `--cherry-pick` drops fixes that already shipped in the previous release through a release-branch cherry-pick. Lines starting `BREAKING CHANGE:` in those commit messages go first, under "Breaking changes". With squash merges, the line has to be kept in the squash commit message.
-- **Changed package, no such commits:** `Rebuilt with updated bundled dependencies; no Peak UI source changes.`
+- **Changed package:** one line per commit in `git log --no-merges --cherry-pick --right-only v<previous>...HEAD` that touches what feeds the package (`src/` minus stories, specs, MDX and story helpers, plus `package.json`, `tsconfig.json`, `rollup.config.js` and its sourcemap helper, `AGENTS.md`, `llms.txt`, `README.md`, `LICENSE` and `ui/tsconfig.base.json`; never tests, test setup or Storybook config), using PMM's commit title. `--cherry-pick` drops fixes that already shipped in the previous release through a release-branch cherry-pick. Lines starting `BREAKING CHANGE:` in those commit messages go first, under "Breaking changes". With squash merges, the line has to be kept in the squash commit message.
+- **Changed package, no such commits:** `Rebuilt with updated dependencies; no Peak UI source changes.`
 - **History:** the new entry is prepended to the `CHANGELOG.md` inside the previous release's tarball, so nothing older needs downloading. A late patch on an older line extends that line's history.
 - **First release from PMM:** the previous release's tarball has no `CHANGELOG.md` (today that is 1.0.32), so the file starts fresh with one entry, `First release from the PMM monorepo. Continues from <previous>.`
 - **Stable builds:** the comparison assumes the same inputs build the same files (Rollup and terser should). The dry run checks this by packing the same commit twice, before the first real release.
@@ -174,7 +175,7 @@ Example (versions illustrative):
 
 ## 3.12.2 (<tag date>)
 
-Rebuilt with updated bundled dependencies; no Peak UI source changes.
+Rebuilt with updated dependencies; no Peak UI source changes.
 
 ## 3.12.1 (<tag date>)
 
