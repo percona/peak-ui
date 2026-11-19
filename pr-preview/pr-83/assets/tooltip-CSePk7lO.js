@@ -1,0 +1,1 @@
+import{r as o,j as r}from"./iframe-CH8YuB_J.js";import{T as i}from"./Tooltip-DExDm35l.js";const s=o.forwardRef(({children:o,...s},e)=>r.jsx(i,{ref:e,...s,children:o}));s.displayName="Tooltip",s.__docgenInfo={description:"",methods:[],displayName:"Tooltip"};export{s as T};

@@ -1,0 +1,1 @@
+var e=Object.defineProperty;const a=((a,r)=>e(a,"name",{value:r,configurable:!0}))(e=>e.replace(/[A-Z]+(?![a-z])|[A-Z]/g,(e,a)=>(a?"-":"")+e.toLowerCase()).replace(/\s+(?=[-])/,"").replace(/\s+(?![-])/,"-"),"kebabize");export{a as k};

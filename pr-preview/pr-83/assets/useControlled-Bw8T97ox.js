@@ -1,0 +1,1 @@
+import{r as e}from"./iframe-CH8YuB_J.js";function useControlled(o){const{controlled:t,default:r,name:l,state:u="value"}=o,{current:n}=e.useRef(void 0!==t),[a,s]=e.useState(r);return[n?t:a,e.useCallback(e=>{n||s(e)},[])]}(0,Object.defineProperty)(useControlled,"name",{value:"useControlled",configurable:!0});export{useControlled as u};

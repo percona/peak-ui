@@ -1,0 +1,1 @@
+var n=Object.defineProperty,__name=(e,c)=>n(e,"name",{value:c,configurable:!0});function createChainedFunction(...n){return n.reduce((n,e)=>null==e?n:__name(function chainedFunction(...c){n.apply(this,c),e.apply(this,c)},"chainedFunction"),()=>{})}__name(createChainedFunction,"createChainedFunction");export{createChainedFunction as c};
