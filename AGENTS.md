@@ -22,6 +22,7 @@ Storybook is the definitive, coded source of truth: **https://percona.github.io/
 - **Never hand-style MUI to "look like Percona", and never override the theme in the app.** No hex colors, no custom fonts, no border radius tweaks. If something looks off, the theme is wrong or missing: do not patch it locally; ask the user what to do or help them file an issue against Peak UI.
 - **Import from the package root only:** `import { TextInput } from '@percona/peak-ui'`. Never deep-import from `@percona/peak-ui/dist/...`.
 - **Customize through the exposed surface.** Peak UI components expose dedicated `*Props` slot props for the MUI component they wrap (for example `textFieldProps`), and some also accept `sx`; many expose only the slots, so check the props type. Do not target internal class names or wrap a Peak UI component just to restyle it.
+- **Global search:** `SearchTrigger` opens `SearchDialog`; the app owns the data, ranking, the global shortcut listener and the platform key caps (Peak UI does no platform detection).
 
 ## Theme wrapper (required, exactly once)
 
